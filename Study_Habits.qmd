@@ -41,7 +41,7 @@ file= "student_habits_performance.csv"
 def load_study_data():
     try:
         libs= import_study_libs()
-        df= pd.read_csv(file_path, sep=';', **kwargs)
+        df= pd.read_csv(file, sep=';', **kwargs)
         dfc=df.columns.str.strip() #To clean up data
         print ("Data Loaded Succesfully!")
     except FileNotFoundError:
@@ -58,7 +58,7 @@ Data is prepped by removing missing values, encoding categorical values and norm
 def study_clean():
     df_missing= df.fillna(df.mean (numeric_only= True))
     df_duplicates= df_missing.drop_duplicates()
-    df_clean= df_duplicates[]
+    df_clean= df_duplicates
 
     print ("Data preprocessed and cleaned!")
     return df_clean

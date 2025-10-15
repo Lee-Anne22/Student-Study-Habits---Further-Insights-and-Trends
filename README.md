@@ -1,7 +1,76 @@
 
 
-## Project Background
+# Project Background
 
-## Project Summary
+Student exam scores are not only determined by sheer willpower or effort
+alone! Exam scores can be effected by various daily habits, including
+sleep, diet, social media usage,etc. Why would this be important to
+consider from a business perspective? Well, in today’s economy, the
+education sector has grown substantially over the past five years alone
+due to the pandemic. Online education tools and accessibility has made
+the market very lucrative and by determining which habits affect exam
+scores more, niche markets for entrepreneurs could be in grasp.
+Therefore, the effect of student habits on exam scores was the main
+focus of this project.
 
-## 
+# Project Summary
+
+The project focused on determining the main daily habits which exerted
+the most effect on exam scores of students between 16-24 years of age.
+The project utilized data obtained from Kaggle and using machine
+learning models were able to determine which daily habits had the
+biggest effect on exam scores. The machine learning models utilised in
+this project include a Linear Regression model and a Decision Tree.
+
+##### Outcome:
+
+ydgfwfwuyiuiyuyeygewuygewuywyeguye
+
+# Project Process
+
+The project started with data cleaning and preparation for the machine
+learning models utilised in this project.
+
+### Data Collection and Preparation
+
+#### <u>Data Loading</u>
+
+The data provided was downloaded as student_habits_performance.csv from
+Kaggle and load using pandas. After loading of the csv file, the
+necessary libraries were imported and placed in a import_study_libs
+class. These libraries can be found in the requirements.txt file for
+replication of the project.
+
+#### <u>Preparation</u>
+
+The data was prepared by first cleaning then encoding categorical
+variables. The cleaning process consisted of filling missing values with
+averages and removing any spacing between words.
+
+### Data Exploration and Model Building
+
+#### <u>Data Exploration</u>
+
+Data exploration began with statistical analysis consisting of mmmm,
+mmm, mmm. After statistical analysis, data exploration began by plotting
+the following plots:
+
+- Scatter plot
+
+- Stacked bar plot
+
+- Violin plot
+
+- Heatmap
+
+- Parallel coordinates
+
+- Radar plot
+
+#### <u>Model Building</u>
+
+Two machine learning models- Linear Regression and Decision Tree- were
+built and trained using Sci-Kit learn for this project. The linear
+regression model were used to predict the exam scores of students when
+considering factors like 1, 2, 3… Meanwhile, a Decision Tree model was
+chosen to determine exam scores when 1, 2, 3..

@@ -80,13 +80,34 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 
 <main class="content" id="quarto-document-content">
 
+<header id="title-block-header" class="quarto-title-block default">
+<div class="quarto-title">
+<h1 class="title">Preparation of Data:</h1>
+</div>
 
+
+
+<div class="quarto-title-meta">
+
+    
+  
+    
+  </div>
+  
+
+
+</header>
 
 
 <section id="data-collection-and-preparation" class="level1">
 <h1>Data Collection and Preparation</h1>
+<section id="collection-of-data" class="level2">
+<h2 class="anchored" data-anchor-id="collection-of-data">Collection of Data:</h2>
 <p>The data collected for this project is provided by Kaggle and thorough preparation of this data were done for machine learning models.</p>
-<div class="code-copy-outer-scaffold"><div class="sourceCode" id="cb1"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="co">#Importing all necessary programs</span></span>
+<div id="391876f2" class="cell" data-execution_count="1">
+<details class="code-fold">
+<summary>Code</summary>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb1"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="co">#Importing all necessary programs</span></span>
 <span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> import_study_libs():</span>
 <span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a>    <span class="im">import</span> numpy <span class="im">as</span> np</span>
 <span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a>    <span class="im">import</span> pandas <span class="im">as</span> pd</span>
@@ -102,12 +123,12 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <span id="cb1-14"><a href="#cb1-14" aria-hidden="true" tabindex="-1"></a>    <span class="im">from</span> sklearn.metrics <span class="im">import</span> make_scorer</span>
 <span id="cb1-15"><a href="#cb1-15" aria-hidden="true" tabindex="-1"></a>    <span class="im">import</span> lime <span class="im">as</span> lime</span>
 <span id="cb1-16"><a href="#cb1-16" aria-hidden="true" tabindex="-1"></a>    <span class="im">import</span> shap <span class="im">as</span> shap</span>
-<span id="cb1-17"><a href="#cb1-17" aria-hidden="true" tabindex="-1"></a>     <span class="cf">return</span> {<span class="st">"np"</span>:np, <span class="st">"pd"</span>:pd, <span class="st">"plt"</span>:plt, <span class="st">"load_wine"</span>:load_wine, <span class="st">"GridSearchCV"</span>:GridSearchCV, <span class="st">"StratifiedKFold"</span>:StratifiedKFold,</span>
+<span id="cb1-17"><a href="#cb1-17" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> {<span class="st">"np"</span>:np, <span class="st">"pd"</span>:pd, <span class="st">"plt"</span>:plt, <span class="st">"load_wine"</span>:load_wine, <span class="st">"GridSearchCV"</span>:GridSearchCV, <span class="st">"StratifiedKFold"</span>:StratifiedKFold,</span>
 <span id="cb1-18"><a href="#cb1-18" aria-hidden="true" tabindex="-1"></a>            <span class="st">"RandomForestClassifier"</span>:RandomForestClassifier, <span class="st">"accuracy_score"</span>: accuracy_score, <span class="st">"confusion_matrix"</span>: confusion_matrix,</span>
 <span id="cb1-19"><a href="#cb1-19" aria-hidden="true" tabindex="-1"></a>            <span class="st">"classification_report"</span>:classification_report, <span class="st">"make_scorer"</span>: make_scorer}</span>
 <span id="cb1-20"><a href="#cb1-20" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb1-21"><a href="#cb1-21" aria-hidden="true" tabindex="-1"></a><span class="co"># Loading the data set</span></span>
-<span id="cb1-22"><a href="#cb1-22" aria-hidden="true" tabindex="-1"></a><span class="bu">file</span><span class="op">=</span> C:\Users\Dell\OneDrive\Zaio Projects\Student<span class="op">-</span>Study<span class="op">-</span>Habits<span class="op">---</span>Further<span class="op">-</span>Insights<span class="op">-</span><span class="kw">and</span><span class="op">-</span>Trends\.venv\student_habits_performance.csv</span>
+<span id="cb1-22"><a href="#cb1-22" aria-hidden="true" tabindex="-1"></a><span class="bu">file</span><span class="op">=</span> <span class="st">"student_habits_performance.csv"</span></span>
 <span id="cb1-23"><a href="#cb1-23" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> load_study_data():</span>
 <span id="cb1-24"><a href="#cb1-24" aria-hidden="true" tabindex="-1"></a>    <span class="cf">try</span>:</span>
 <span id="cb1-25"><a href="#cb1-25" aria-hidden="true" tabindex="-1"></a>        libs<span class="op">=</span> import_study_libs()</span>
@@ -115,9 +136,100 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <span id="cb1-27"><a href="#cb1-27" aria-hidden="true" tabindex="-1"></a>        dfc<span class="op">=</span>df.columns.<span class="bu">str</span>.strip() <span class="co">#To clean up data</span></span>
 <span id="cb1-28"><a href="#cb1-28" aria-hidden="true" tabindex="-1"></a>        <span class="bu">print</span> (<span class="st">"Data Loaded Succesfully!"</span>)</span>
 <span id="cb1-29"><a href="#cb1-29" aria-hidden="true" tabindex="-1"></a>    <span class="cf">except</span> <span class="pp">FileNotFoundError</span>:</span>
-<span id="cb1-30"><a href="#cb1-30" aria-hidden="true" tabindex="-1"></a>        <span class="bu">print</span> (<span class="ss">f"File not found!: </span><span class="sc">{</span>file_path<span class="sc">}</span><span class="ss">"</span>)</span>
-<span id="cb1-31"><a href="#cb1-31" aria-hidden="true" tabindex="-1"></a>   </span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
-<p>##Testing</p>
+<span id="cb1-30"><a href="#cb1-30" aria-hidden="true" tabindex="-1"></a>        <span class="bu">print</span> (<span class="ss">f"File not found!: </span><span class="sc">{</span>file_path<span class="sc">}</span><span class="ss">"</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
+</div>
+<p>Data is prepped by removing missing values, encoding categorical values and normalising numeric variables.</p>
+<div id="0cc04da1" class="cell" data-execution_count="2">
+<details class="code-fold">
+<summary>Code</summary>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb2"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Handle missing Values and duplicates:</span></span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a><span class="kw">def</span> study_clean():</span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a>    df_missing<span class="op">=</span> df.fillna(df.mean (numeric_only<span class="op">=</span> <span class="va">True</span>))</span>
+<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a>    df_duplicates<span class="op">=</span> df_missing.drop_duplicates()</span>
+<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a>    df_clean<span class="op">=</span> df_duplicates</span>
+<span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-7"><a href="#cb2-7" aria-hidden="true" tabindex="-1"></a>    <span class="bu">print</span> (<span class="st">"Data preprocessed and cleaned!"</span>)</span>
+<span id="cb2-8"><a href="#cb2-8" aria-hidden="true" tabindex="-1"></a>    <span class="cf">return</span> df_clean</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
+</div>
+</section>
+</section>
+<section id="data-exploration-and-model-building" class="level1">
+<h1>Data Exploration and Model Building</h1>
+<section id="statistical-analysis" class="level2">
+<h2 class="anchored" data-anchor-id="statistical-analysis">Statistical Analysis:</h2>
+<p>The data was first explored by applied statistical in three ways:</p>
+<ul>
+<li><p>Mean study time by Health Tier</p></li>
+<li><p>Correlation between sleep and exam scores</p></li>
+<li><p>Outlier detection</p></li>
+</ul>
+<div id="07c2b9d9" class="cell" data-execution_count="3">
+<details class="code-fold">
+<summary>Code</summary>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb3"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Statistical Analysis</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
+</div>
+</section>
+<section id="data-exploration" class="level2">
+<h2 class="anchored" data-anchor-id="data-exploration">Data Exploration:</h2>
+<p>Data were explored and the following plots were obtained:</p>
+<ul>
+<li><p>Scatter plot</p></li>
+<li><p>Stacked bar plot</p></li>
+<li><p>Box/Violin plots</p></li>
+<li><p>Heatmaps</p></li>
+<li><p>Parallel Coordinates plots</p></li>
+<li><p>Radar Charts</p></li>
+</ul>
+<div id="856dc129" class="cell" data-execution_count="4">
+<details class="code-fold">
+<summary>Code</summary>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb4"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Scatter plot</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
+</div>
+<div id="498295d9" class="cell" data-execution_count="5">
+<details class="code-fold">
+<summary>Code</summary>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb5"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="co">#Stacked bar plot</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
+</div>
+<div id="ce7bf47d" class="cell" data-execution_count="6">
+<details class="code-fold">
+<summary>Code</summary>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb6"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="co">#Violin plot</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
+</div>
+<div id="15cfd08a" class="cell" data-execution_count="7">
+<details class="code-fold">
+<summary>Code</summary>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb7"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="co">#Heatmap</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
+</div>
+<div id="7569189f" class="cell" data-execution_count="8">
+<details class="code-fold">
+<summary>Code</summary>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb8"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="co">#Parallel Coordinates plot</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
+</div>
+<div id="a65dc1dd" class="cell" data-execution_count="9">
+<details class="code-fold">
+<summary>Code</summary>
+<div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb9"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a><span class="co">#Radar Charts</span></span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+</details>
+</div>
+</section>
+<section id="model-building" class="level2">
+<h2 class="anchored" data-anchor-id="model-building">Model Building:</h2>
+<p>The linear regression model and decision tree model were trained for this project:</p>
+<section id="linear-regression-model" class="level5">
+<h5 class="anchored" data-anchor-id="linear-regression-model">Linear Regression Model</h5>
+</section>
+<section id="decision-tree" class="level5">
+<h5 class="anchored" data-anchor-id="decision-tree">Decision Tree</h5>
+</section>
+</section>
 </section>
 
 </main>
