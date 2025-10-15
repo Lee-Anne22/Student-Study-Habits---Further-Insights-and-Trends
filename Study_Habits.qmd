@@ -1,0 +1,50 @@
+---
+Title: Student Study Habits 
+Subtitle: Further Insights and Trends
+Author: Lee-Anne van der Merwe
+format: 
+    html: 
+        code-fold: true
+jupyter: python3
+cache: True
+---
+
+# Data Collection and Preparation
+
+The data collected for this project is provided by Kaggle and thorough preparation of this data were done for machine learning models.
+
+``` python
+#Importing all necessary programs
+def import_study_libs():
+    import numpy as np
+    import pandas as pd
+    import seaborn as sns
+    import matplotlib.pyplot as plt
+    import sklearn as sk
+    from sklearn.model_selection import GridSearchCV
+    from sklearn.model_selection import StratifiedKFold
+    from sklearn.ensemble import RandomForestClassifier
+    from sklearn.metrics import accuracy_score
+    from sklearn.metrics import confusion_matrix
+    from sklearn.metrics import classification_report
+    from sklearn.metrics import make_scorer
+    import lime as lime
+    import shap as shap
+     return {"np":np, "pd":pd, "plt":plt, "load_wine":load_wine, "GridSearchCV":GridSearchCV, "StratifiedKFold":StratifiedKFold,
+            "RandomForestClassifier":RandomForestClassifier, "accuracy_score": accuracy_score, "confusion_matrix": confusion_matrix,
+            "classification_report":classification_report, "make_scorer": make_scorer}
+
+# Loading the data set
+file= C:\Users\Dell\OneDrive\Zaio Projects\Student-Study-Habits---Further-Insights-and-Trends\.venv\student_habits_performance.csv
+def load_study_data():
+    try:
+        libs= import_study_libs()
+        df= pd.read_csv(file_path, sep=';', **kwargs)
+        dfc=df.columns.str.strip() #To clean up data
+        print ("Data Loaded Succesfully!")
+    except FileNotFoundError:
+        print (f"File not found!: {file_path}")
+   
+```
+
+##Testing
