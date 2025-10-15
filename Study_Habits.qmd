@@ -6,14 +6,16 @@ format:
     html: 
         code-fold: true
 jupyter: python3
-cache: True
+kernal: base
 ---
 
 # Data Collection and Preparation
 
+## Collection of Data:
+
 The data collected for this project is provided by Kaggle and thorough preparation of this data were done for machine learning models.
 
-``` python
+```{python}
 #Importing all necessary programs
 def import_study_libs():
     import numpy as np
@@ -30,12 +32,12 @@ def import_study_libs():
     from sklearn.metrics import make_scorer
     import lime as lime
     import shap as shap
-     return {"np":np, "pd":pd, "plt":plt, "load_wine":load_wine, "GridSearchCV":GridSearchCV, "StratifiedKFold":StratifiedKFold,
+    return {"np":np, "pd":pd, "plt":plt, "load_wine":load_wine, "GridSearchCV":GridSearchCV, "StratifiedKFold":StratifiedKFold,
             "RandomForestClassifier":RandomForestClassifier, "accuracy_score": accuracy_score, "confusion_matrix": confusion_matrix,
             "classification_report":classification_report, "make_scorer": make_scorer}
 
 # Loading the data set
-file= C:\Users\Dell\OneDrive\Zaio Projects\Student-Study-Habits---Further-Insights-and-Trends\.venv\student_habits_performance.csv
+file= "student_habits_performance.csv"
 def load_study_data():
     try:
         libs= import_study_libs()
@@ -44,7 +46,95 @@ def load_study_data():
         print ("Data Loaded Succesfully!")
     except FileNotFoundError:
         print (f"File not found!: {file_path}")
-   
+        
 ```
 
-##Testing
+## Preparation of Data:
+
+Data is prepped by removing missing values, encoding categorical values and normalising numeric variables.
+
+```{python}
+# Handle missing Values and duplicates:
+def study_clean():
+    df_missing= df.fillna(df.mean (numeric_only= True))
+    df_duplicates= df_missing.drop_duplicates()
+    df_clean= df_duplicates[]
+
+    print ("Data preprocessed and cleaned!")
+    return df_clean
+    
+    
+
+```
+
+# Data Exploration and Model Building
+
+## Statistical Analysis:
+
+The data was first explored by applied statistical in three ways:
+
+-   Mean study time by Health Tier
+
+-   Correlation between sleep and exam scores
+
+-   Outlier detection
+
+```{python}
+# Statistical Analysis
+```
+
+## Data Exploration:
+
+Data were explored and the following plots were obtained:
+
+-   Scatter plot
+
+-   Stacked bar plot
+
+-   Box/Violin plots
+
+-   Heatmaps
+
+-   Parallel Coordinates plots
+
+-   Radar Charts
+
+```{python}
+# Scatter plot
+```
+
+```{python}
+#Stacked bar plot
+```
+
+```{python}
+#Violin plot
+```
+
+```{python}
+#Heatmap
+```
+
+```{python}
+#Parallel Coordinates plot
+```
+
+```{python}
+#Radar Charts
+```
+
+## Model Building:
+
+The linear regression model and decision tree model were trained for this project:
+
+##### Linear Regression Model
+
+```{python}
+
+```
+
+##### Decision Tree
+
+```{python}
+
+```
