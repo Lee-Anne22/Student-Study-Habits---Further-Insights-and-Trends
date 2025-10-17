@@ -89,18 +89,39 @@ Data were explored and the following plots were obtained:
 
 -   Scatter plot
 
+    -   The correlation between exam score and internet quality, diet quality, sleep hours and exercise frequency
+
 -   Stacked bar plot
+
+    -   The difference in categories between the following age groups: 16-18 years, 19-20 years, 21-22 years and 23-24 years.
 
 -   Box/Violin plots
 
+    -   Mental Health rating per age group: 16-18 years, 19-20 years, 21-22 years and 23-24 years.
+
 -   Heatmaps
+
+    -   To gain multivariate insights between categories
 
 -   Parallel Coordinates plots
 
+    -   
+
 -   Radar Charts
 
+    -   The difference in time spent between the following age groups: 16-18 years, 19-20 years, 21-22 years and 23-24 years.
+
+        -   Amount of study hours - study hours
+
+        -   Amount of time spent on social media - social media hours
+
+        -   Amount of time spent on Netflix - netflix hours
+
+        -   Amount of time spent on sleep - sleep hours
+
 ```{python}
-# Scatter plot
+# Scatter plot 1: Exam score vs Internet Quality
+
 ```
 
 ```{python}
@@ -129,11 +150,36 @@ The linear regression model and decision tree model were trained for this projec
 
 ##### Linear Regression Model
 
+The following categories were considered in the linear regression model:
+
+-   Study hours
+-   Sleep hours
+-   Social Media hours
+-   Netflix hours
+-   Exercise frequency
+-   Predicted Exam Score
+
+The categories expected to be most profitable were increased to predict the impact on exam score. These categories were: sleep hours, study hours and exercise frequency.
+
 ```{python}
 
 ```
 
 ##### Decision Tree
+
+A decision tree was utilised to predict whether a student would obtain an exam score above 75% or not.
+
+#Note to self: Need to change the following categories:
+
+-   part-time -\> 0 or 1 (binary class)
+
+-   diet quality (multi-class)
+
+-   parental education (multi-class)
+
+-   internet quality (multi-class)
+
+-   extracurricular activity -\> 0 or 1 (binary class)
 
 ```{python}
 
