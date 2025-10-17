@@ -56,21 +56,45 @@ mmm, mmm. After statistical analysis, data exploration began by plotting
 the following plots:
 
 - Scatter plot
-
+  - The correlation between exam score and internet quality, diet
+    quality, sleep hours and exercise frequency
 - Stacked bar plot
-
+  - The difference in categories between the following age groups: 16-18
+    years, 19-20 years, 21-22 years and 23-24 years.
 - Violin plot
-
+  - Mental Health rating per age group: 16-18 years, 19-20 years, 21-22
+    years and 23-24 years.
 - Heatmap
-
+  - To gain multivariate insights between categories
 - Parallel coordinates
-
 - Radar plot
+  - The difference in time spent between the following age groups: 16-18
+    years, 19-20 years, 21-22 years and 23-24 years.
+
+    - Amount of study hours - study hours
+
+    - Amount of time spent on social media - social media hours
+
+    - Amount of time spent on Netflix - netflix hours
+
+    - Amount of time spent on sleep - sleep hours
 
 #### <u>Model Building</u>
 
-Two machine learning models- Linear Regression and Decision Tree- were
+Two machine learning models- Linear Regression and a Decision Tree- were
 built and trained using Sci-Kit learn for this project. The linear
 regression model were used to predict the exam scores of students when
-considering factors like 1, 2, 3… Meanwhile, a Decision Tree model was
-chosen to determine exam scores when 1, 2, 3..
+considering the following factors:
+
+- Study hours
+- Sleep hours
+- Social Media hours
+- Netflix hours
+- Exercise frequency
+- Predicted Exam Score
+
+The categories expected to be most profitable were increased to predict
+the impact on exam score. These categories were: sleep hours, study
+hours and exercise frequency. Meanwhile, a Decision Tree model was
+utilised to predict whether a student would obtain an exam score above
+75% or not.
