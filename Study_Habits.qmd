@@ -2,9 +2,8 @@
 Title: Student Study Habits 
 Subtitle: Further Insights and Trends
 Author: Lee-Anne van der Merwe
-format: 
-    html: 
-        code-fold: true
+format: ipynb
+code-fold: true
 jupyter: python3
 kernal: base
 ---
@@ -23,17 +22,19 @@ def import_study_libs():
     import seaborn as sns
     import matplotlib.pyplot as plt
     import sklearn as sk
+    from sklearn.model_selection import train_test_split
     from sklearn.model_selection import GridSearchCV
     from sklearn.model_selection import StratifiedKFold
-    from sklearn.ensemble import RandomForestClassifier
+    from sklearn.tree import DecisionTreeClassifier
+    from sklearn.tree import plot_tree
     from sklearn.metrics import accuracy_score
     from sklearn.metrics import confusion_matrix
     from sklearn.metrics import classification_report
     from sklearn.metrics import make_scorer
     import lime as lime
     import shap as shap
-    return {"np":np, "pd":pd, "plt":plt, "load_wine":load_wine, "GridSearchCV":GridSearchCV, "StratifiedKFold":StratifiedKFold,
-            "RandomForestClassifier":RandomForestClassifier, "accuracy_score": accuracy_score, "confusion_matrix": confusion_matrix,
+    return {"np": np, "pd": pd, "plt": plt, "train_test_split": train_test_split, "GridSearchCV": GridSearchCV, "StratifiedKFold": StratifiedKFold,
+            "DecisionTreeClassifier": DecisionTreeClassifier, "accuracy_score": accuracy_score, "confusion_matrix": confusion_matrix,
             "classification_report":classification_report, "make_scorer": make_scorer}
 
 # Loading the data set
@@ -41,25 +42,37 @@ file= "student_habits_performance.csv"
 def load_study_data():
     try:
         libs= import_study_libs()
-        df= pd.read_csv(file, sep=';', **kwargs)
+        pd= libs["pd"]
+        df= pd.read_csv(file, sep=';')
         dfc=df.columns.str.strip() #To clean up data
         print ("Data Loaded Succesfully!")
     except FileNotFoundError:
-        print (f"File not found!: {file_path}")
+        print (f"File not found!: {file}")
         
 ```
 
 ## Preparation of Data:
 
-Data is prepped by removing missing values, encoding categorical values and normalising numeric variables.
+Data is prepped by removing missing values, selecting the age range, encoding categorical values and normalising numeric variables.
 
 ```{python}
 # Handle missing Values and duplicates:
 def study_clean():
+    data= load_study_data()
+    df= data["dfc"]
+    libs= import_study_libs()
+    pd= libs["pd"]
+    np= libs["np"]
+    size=df.head()
+    shape=df.shape()
+    stats=df.describe()
+    print (f"Data size: {size}\n Data shape: {shape}\n Data Statistics: {stats}")
     df_missing= df.fillna(df.mean (numeric_only= True))
     df_duplicates= df_missing.drop_duplicates()
-    df_clean= df_duplicates
-
+    df_clean = df_duplicates[
+            (df_duplicates["sleep_hours"] + df_duplicates["social_media_hours"] + df_duplicates["netflix_hours"] + df_duplicates["study_hours_per_day"] <= 24) &
+            (df_duplicates["sleep_hours"] >= 0) & 
+            (df_duplicates["age"].between(16, 24))]
     print ("Data preprocessed and cleaned!")
     return df_clean
     
@@ -81,6 +94,12 @@ The data was first explored by applied statistical in three ways:
 
 ```{python}
 # Statistical Analysis
+def stats():
+    data= study_clean()
+    #Get data statistical analysis after cleaning
+    return data.describe()
+
+
 ```
 
 ## Data Exploration:
@@ -89,7 +108,7 @@ Data were explored and the following plots were obtained:
 
 -   Scatter plot
 
-    -   The correlation between exam score and internet quality, diet quality, sleep hours and exercise frequency
+    -   The correlation between exam score and internet quality, sleep hours and exercise frequency
 
 -   Stacked bar plot
 
@@ -120,16 +139,62 @@ Data were explored and the following plots were obtained:
         -   Amount of time spent on sleep - sleep hours
 
 ```{python}
-# Scatter plot 1: Exam score vs Internet Quality
+def Scatterplots():
+    data= study_clean()
+    df= data["df_clean"]
+    libs = import_study_libs()
+    plt= libs["plt"]
+    sns= libs["sns"]
+# Scatter plot : Subplot (1) Exam score vs Internet Quality
+    plt.figure(figsize=(15,8), facecolor='c')
+    sns.set_style("whitegrid")
+    x=df["Internet_Quality"]
+    y=df["exam_score"]
+    plt.subplot (2,3,1) # creating the plot
+    ax.set_xlabel("Internet Quality")
+    ax.set_ylabel("Exam Score")
+    ax.plot(x,y,)
+    ax.set_title("Exam Score VS Internet Quality", fontsize=12)
+    fig.tight
+    plt.show
+    from Ipython.display import Image
+    fig.savefig('ExamScore_vs_InternetQuality.png') #saving plot as png
+
+    # # Subplot(2) Exam score vs Sleep
+    # x=
+    # y=
+    # plt.subplots(2,3,2) # creating the plot
+    # ax.set_xlabel("Sleep Hours")
+    # ax.set_ylabel("Exam Score")
+    # ax.plot(x,y,"dark blue")
+    # ax.set_title("Exam Scores VS Sleep Hours", fontsize=12)
+    # fig.tight
+    # plt.show
+    # from Ipython.display import Image
+    # fig.savefig('ExamScore_vs_Sleep.png') #saving plot as png
+
+    # # Subplot (3): Exam score vs Exercise Frequency
+    # x=
+    # y=
+    # plt.subplots(2,3,3) # creating the plot
+    # ax.set_xlabel("Exercise Frequency")
+    # ax.set_ylabel("Exam Score")
+    # ax.plot(x,y,"dark blue")
+    # ax.set_title("Exam Scores VS Exercise Frequency", fontsize=12)
+    # fig.tight
+    # plt.show
+    # from Ipython.display import Image
+    # fig.savefig('ExamScore_vs_Sleep.png') #saving plot as png
 
 ```
 
 ```{python}
-#Stacked bar plot
+#Stacked bar plot1: Difference in age groups
+
 ```
 
 ```{python}
-#Violin plot
+#Violin plot: Mental Health rating per age group: 16-18 years, 19-20 years, 21-22 years and 23-24 years
 ```
 
 ```{python}

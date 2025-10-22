@@ -22,10 +22,6 @@ learning models were able to determine which daily habits had the
 biggest effect on exam scores. The machine learning models utilised in
 this project include a Linear Regression model and a Decision Tree.
 
-##### Outcome:
-
-ydgfwfwuyiuiyuyeygewuygewuywyeguye
-
 # Project Process
 
 The project started with data cleaning and preparation for the machine

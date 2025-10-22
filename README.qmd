@@ -13,10 +13,6 @@ Student exam scores are not only determined by sheer willpower or effort alone! 
 
 The project focused on determining the main daily habits which exerted the most effect on exam scores of students between 16-24 years of age. The project utilized data obtained from Kaggle and using machine learning models were able to determine which daily habits had the biggest effect on exam scores. The machine learning models utilised in this project include a Linear Regression model and a Decision Tree.
 
-##### Outcome:
-
-ydgfwfwuyiuiyuyeygewuygewuywyeguye
-
 # Project Process
 
 The project started with data cleaning and preparation for the machine learning models utilised in this project.
