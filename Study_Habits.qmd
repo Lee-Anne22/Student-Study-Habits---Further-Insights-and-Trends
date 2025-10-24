@@ -10,6 +10,11 @@ kernal: base
 
 # Data Collection and Preparation
 
+```{python}
+!pip install shap
+!pip install lime
+```
+
 ## Collection of Data:
 
 The data collected for this project is provided by Kaggle and thorough preparation of this data were done for machine learning models.
@@ -44,10 +49,12 @@ def load_study_data():
         libs= import_study_libs()
         pd= libs["pd"]
         df= pd.read_csv(file, sep=';')
-        dfc=df.columns.str.strip() #To clean up data
+        df.columns=df.columns.str.strip() #To clean up data
         print ("Data Loaded Succesfully!")
+        return df
     except FileNotFoundError:
         print (f"File not found!: {file}")
+        return None
         
 ```
 
@@ -58,24 +65,30 @@ Data is prepped by removing missing values, selecting the age range, encoding ca
 ```{python}
 # Handle missing Values and duplicates:
 def study_clean():
-    data= load_study_data()
-    df= data["dfc"]
-    libs= import_study_libs()
-    pd= libs["pd"]
-    np= libs["np"]
-    size=df.head()
-    shape=df.shape()
-    stats=df.describe()
-    print (f"Data size: {size}\n Data shape: {shape}\n Data Statistics: {stats}")
-    df_missing= df.fillna(df.mean (numeric_only= True))
-    df_duplicates= df_missing.drop_duplicates()
+    df = load_study_data()
+    if df is None:
+        return None  # Exit early if loading failed
+
+    libs = import_study_libs()
+    pd = libs["pd"]
+    np = libs["np"]
+
+    print(f"Data size:\n{df.head()}\n")
+    print(f"Data shape: {df.shape}\n")
+    print(f"Data Statistics:\n{df.describe()}\n")
+
+    df_missing = df.fillna(df.mean(numeric_only=True))
+    df_duplicates = df_missing.drop_duplicates()
+
     df_clean = df_duplicates[
-            (df_duplicates["sleep_hours"] + df_duplicates["social_media_hours"] + df_duplicates["netflix_hours"] + df_duplicates["study_hours_per_day"] <= 24) &
-            (df_duplicates["sleep_hours"] >= 0) & 
-            (df_duplicates["age"].between(16, 24))]
-    print ("Data preprocessed and cleaned!")
+        (df_duplicates["sleep_hours"] + df_duplicates["social_media_hours"] +
+         df_duplicates["netflix_hours"] + df_duplicates["study_hours_per_day"] <= 24) &
+        (df_duplicates["sleep_hours"] >= 0) &
+        (df_duplicates["age"].between(16, 24))
+    ]
+
+    print("Data preprocessed and cleaned!")
     return df_clean
-    
     
 
 ```
@@ -96,6 +109,7 @@ The data was first explored by applied statistical in three ways:
 # Statistical Analysis
 def stats():
     data= study_clean()
+    df=data["df_clean"]
     #Get data statistical analysis after cleaning
     return data.describe()
 
@@ -151,8 +165,8 @@ def Scatterplots():
     x=df["Internet_Quality"]
     y=df["exam_score"]
     plt.subplot (2,3,1) # creating the plot
-    ax.set_xlabel("Internet Quality")
-    ax.set_ylabel("Exam Score")
+    ax.set_xlabel("internet_quality")
+    ax.set_ylabel("exam_score")
     ax.plot(x,y,)
     ax.set_title("Exam Score VS Internet Quality", fontsize=12)
     fig.tight
@@ -160,31 +174,31 @@ def Scatterplots():
     from Ipython.display import Image
     fig.savefig('ExamScore_vs_InternetQuality.png') #saving plot as png
 
-    # # Subplot(2) Exam score vs Sleep
-    # x=
-    # y=
-    # plt.subplots(2,3,2) # creating the plot
-    # ax.set_xlabel("Sleep Hours")
-    # ax.set_ylabel("Exam Score")
-    # ax.plot(x,y,"dark blue")
-    # ax.set_title("Exam Scores VS Sleep Hours", fontsize=12)
-    # fig.tight
-    # plt.show
-    # from Ipython.display import Image
-    # fig.savefig('ExamScore_vs_Sleep.png') #saving plot as png
+    # Subplot(2) Exam score vs Sleep
+    x=df["sleep_hours"]
+    y=df["exam_score"]
+    plt.subplots(2,3,2) # creating the plot
+    ax.set_xlabel("Sleep Hours")
+    ax.set_ylabel("Exam Score")
+    ax.plot(x,y,"dark blue")
+    ax.set_title("Exam Scores VS Sleep Hours", fontsize=12)
+    fig.tight
+    plt.show
+    from Ipython.display import Image
+    fig.savefig('ExamScore_vs_Sleep.png') #saving plot as png
 
-    # # Subplot (3): Exam score vs Exercise Frequency
-    # x=
-    # y=
-    # plt.subplots(2,3,3) # creating the plot
-    # ax.set_xlabel("Exercise Frequency")
-    # ax.set_ylabel("Exam Score")
-    # ax.plot(x,y,"dark blue")
-    # ax.set_title("Exam Scores VS Exercise Frequency", fontsize=12)
-    # fig.tight
-    # plt.show
-    # from Ipython.display import Image
-    # fig.savefig('ExamScore_vs_Sleep.png') #saving plot as png
+    # Subplot (3): Exam score vs Exercise Frequency
+    x=df["exercise_frequency"]
+    y=df["exam_score"]
+    plt.subplots(2,3,3) # creating the plot
+    ax.set_xlabel("Exercise Frequency")
+    ax.set_ylabel("Exam Score")
+    ax.plot(x,y,"dark blue")
+    ax.set_title("Exam Scores VS Exercise Frequency", fontsize=12)
+    fig.tight
+    plt.show
+    from Ipython.display import Image
+    fig.savefig('ExamScore_vs_Sleep.png') #saving plot as png
 
 ```
 
@@ -207,6 +221,17 @@ def Scatterplots():
 
 ```{python}
 #Radar Charts
+```
+
+```{python}
+#calling all functions
+def main():
+    functions= [import_study_libs, load_study_data, study_clean] 
+    for func in functions:
+        func()
+
+if __name__== '__main__':
+    main()
 ```
 
 ## Model Building:
