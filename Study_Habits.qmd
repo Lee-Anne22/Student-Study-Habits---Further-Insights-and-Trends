@@ -11,8 +11,7 @@ kernal: base
 # Data Collection and Preparation
 
 ```{python}
-!pip install shap
-!pip install lime
+!pip install IPython
 ```
 
 ## Collection of Data:
@@ -38,9 +37,10 @@ def import_study_libs():
     from sklearn.metrics import make_scorer
     import lime as lime
     import shap as shap
-    return {"np": np, "pd": pd, "plt": plt, "train_test_split": train_test_split, "GridSearchCV": GridSearchCV, "StratifiedKFold": StratifiedKFold,
-            "DecisionTreeClassifier": DecisionTreeClassifier, "accuracy_score": accuracy_score, "confusion_matrix": confusion_matrix,
-            "classification_report":classification_report, "make_scorer": make_scorer}
+    from IPython.display import Image
+    return {"np": np, "pd": pd, "sns": sns, "plt": plt, "train_test_split": train_test_split, "GridSearchCV": GridSearchCV, "StratifiedKFold": StratifiedKFold,
+            "DecisionTreeClassifier": DecisionTreeClassifier, "plot_tree": plot_tree, "accuracy_score": accuracy_score, "confusion_matrix": confusion_matrix,
+            "classification_report":classification_report, "make_scorer": make_scorer, "lime": lime, "shap": shap, "Image": Image}
 
 # Loading the data set
 file= "student_habits_performance.csv"
@@ -111,7 +111,7 @@ def stats():
     data= study_clean()
     df=data["df_clean"]
     #Get data statistical analysis after cleaning
-    return data.describe()
+    return data.columns, data.describe()
 
 
 ```
@@ -154,65 +154,100 @@ Data were explored and the following plots were obtained:
 
 ```{python}
 def Scatterplots():
-    data= study_clean()
-    df= data["df_clean"]
+#Import libraries
+    df = load_study_data()
+    if df is None:
+        return None 
+        
     libs = import_study_libs()
     plt= libs["plt"]
     sns= libs["sns"]
+    Image= libs["Image"]
+#Create three scatter plots
 # Scatter plot : Subplot (1) Exam score vs Internet Quality
-    plt.figure(figsize=(15,8), facecolor='c')
+    # Plot Style
     sns.set_style("whitegrid")
-    x=df["Internet_Quality"]
+    
+    # Create figure and subplots
+    fig, axs = plt.subplots(1, 3, figsize=(15, 8))  # 1 row, 3 columns
+    #Extracting data and giving them variables
+    x1=df["internet_quality"]
+    x2=df["sleep_hours"]
+    x3=df["exercise_frequency"]
     y=df["exam_score"]
-    plt.subplot (2,3,1) # creating the plot
-    ax.set_xlabel("internet_quality")
-    ax.set_ylabel("exam_score")
-    ax.plot(x,y,)
-    ax.set_title("Exam Score VS Internet Quality", fontsize=12)
-    fig.tight
-    plt.show
-    from Ipython.display import Image
-    fig.savefig('ExamScore_vs_InternetQuality.png') #saving plot as png
 
+    axs[0].scatter(x1, y, color='blue' )
+    axs[0].set_xlabel("Internet Quality")
+    axs[0].set_ylabel("Exam Score")
+    axs[0].set_title("Exam Score VS Internet Quality", fontsize=12)
+ 
     # Subplot(2) Exam score vs Sleep
-    x=df["sleep_hours"]
-    y=df["exam_score"]
-    plt.subplots(2,3,2) # creating the plot
-    ax.set_xlabel("Sleep Hours")
-    ax.set_ylabel("Exam Score")
-    ax.plot(x,y,"dark blue")
-    ax.set_title("Exam Scores VS Sleep Hours", fontsize=12)
-    fig.tight
-    plt.show
-    from Ipython.display import Image
-    fig.savefig('ExamScore_vs_Sleep.png') #saving plot as png
-
+    axs[1].scatter(x2, y, color='green')
+    axs[1].set_xlabel("Sleep Hours")
+    axs[1].set_ylabel("Exam Score")
+    axs[1].set_title("Exam Scores VS Sleep Hours", fontsize=12)
+    
     # Subplot (3): Exam score vs Exercise Frequency
-    x=df["exercise_frequency"]
-    y=df["exam_score"]
-    plt.subplots(2,3,3) # creating the plot
-    ax.set_xlabel("Exercise Frequency")
-    ax.set_ylabel("Exam Score")
-    ax.plot(x,y,"dark blue")
-    ax.set_title("Exam Scores VS Exercise Frequency", fontsize=12)
-    fig.tight
-    plt.show
-    from Ipython.display import Image
-    fig.savefig('ExamScore_vs_Sleep.png') #saving plot as png
+    axs[2].scatter(x3, y, color='orange')
+    axs[2].set_xlabel("Exercise Frequency")
+    axs[2].set_ylabel("Exam Score")
+    axs[2].set_title("Exam Scores VS Exercise Frequency", fontsize=12)
+    plt.tight_layout()
+    
+    fig.savefig('ExamScore_vs_Study_Habits.png') #saving plot as png
+    plt.show()
 
 ```
 
 ```{python}
 #Stacked bar plot1: Difference in age groups
+def stackedbar():
+    df = load_study_data()
+    if df is None:
+        return None 
+        
+    libs = import_study_libs()
+    plt= libs["plt"]
+    sns= libs["sns"]
+    Image= libs["Image"]
 
 ```
 
 ```{python}
 #Violin plot: Mental Health rating per age group: 16-18 years, 19-20 years, 21-22 years and 23-24 years
+def violinplot():
+    df = load_study_data()
+    if df is None:
+        return None 
+        
+    libs = import_study_libs()
+    plt= libs["plt"]
+    sns= libs["sns"]
+    Image= libs["Image"]
+
+#Extract data and give them variables
+x1= df["age"].between 16, 18
+x2= df["age"].between 19, 20
+x3= df["age"].between 21, 22
+x4= df["age"].between 23, 24
+x_variables=[x1, x2, x3, x4]
+y_varibles= df["mental_health_rating"]
+
+#create plot
+fig, axs =
 ```
 
 ```{python}
 #Heatmap
+def heatamp():
+    df = load_study_data()
+    if df is None:
+        return None 
+        
+    libs = import_study_libs()
+    plt= libs["plt"]
+    sns= libs["sns"]
+    Image= libs["Image"]
 ```
 
 ```{python}
@@ -226,7 +261,7 @@ def Scatterplots():
 ```{python}
 #calling all functions
 def main():
-    functions= [import_study_libs, load_study_data, study_clean] 
+    functions= [import_study_libs, load_study_data, study_clean, Scatterplots] 
     for func in functions:
         func()
 
