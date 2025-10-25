@@ -216,6 +216,7 @@ def stackedbar():
 ```{python}
 #Violin plot: Mental Health rating per age group: 16-18 years, 19-20 years, 21-22 years and 23-24 years
 def violinplot():
+    #import libraries
     df = load_study_data()
     if df is None:
         return None 
@@ -223,23 +224,32 @@ def violinplot():
     libs = import_study_libs()
     plt= libs["plt"]
     sns= libs["sns"]
+    pd= libs["pd"]
     Image= libs["Image"]
 
-#Extract data and give them variables
-x1= df["age"].between 16, 18
-x2= df["age"].between 19, 20
-x3= df["age"].between 21, 22
-x4= df["age"].between 23, 24
-x_variables=[x1, x2, x3, x4]
-y_varibles= df["mental_health_rating"]
-
-#create plot
-fig, axs =
+    #Extract data and make age groups through the use of bins
+    bins = [15, 18, 20, 22, 24]
+    labels = ['16-18', '19-20', '21-22', '23-24']
+    df['age_group'] = pd.cut(df['age'], bins=bins, labels=labels, right=True)
+    
+    #create plot
+    fig, axes= plt.subplots(figsize=(10,5))
+    #make it a violinplot
+    sns.violinplot(x= 'age_group', y='mental_health_rating', data=df, ax=axes, palette='rainbow', hue='age_group', legend=False)
+    axes.set_title("Mental Health Rating Across Age Groups")
+    axes.set_xlabel('Age Groups')
+    axes.set_ylabel('Mental Health Rating')
+    plt.tight_layout()
+    
+    #save figure and show
+    fig.savefig('mental_health_rating_across_age_groups.png')
+    plt.show()
 ```
 
 ```{python}
 #Heatmap
-def heatamp():
+def heatmap():
+    #import libraries
     df = load_study_data()
     if df is None:
         return None 
@@ -248,6 +258,20 @@ def heatamp():
     plt= libs["plt"]
     sns= libs["sns"]
     Image= libs["Image"]
+
+    #cleaning to prep data for the heatmap by removing categorical fields
+    heatdata=df.drop(['student_id', 'gender', 'part_time_job', 'diet_quality', 'internet_quality', 'parental_education_level', 'extracurricular_participation'], axis='columns')
+    
+    
+    #create plot
+    fig, axes= plt.subplots(figsize=(10,5))
+    #make it a heatmap
+    sns.heatmap(heatdata.corr(), cmap='rainbow', annot= True)
+    axes.set_title('Correlation Of Numeric Study Habits')
+    #save and show figure
+    plt.tight_layout()
+    fig.savefig('Heatmap.png')
+    plt.show()
 ```
 
 ```{python}
@@ -261,7 +285,7 @@ def heatamp():
 ```{python}
 #calling all functions
 def main():
-    functions= [import_study_libs, load_study_data, study_clean, Scatterplots] 
+    functions= [import_study_libs, load_study_data, study_clean, Scatterplots, violinplot, heatmap] 
     for func in functions:
         func()
 
