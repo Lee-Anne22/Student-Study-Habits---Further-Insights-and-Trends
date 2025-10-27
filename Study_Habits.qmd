@@ -227,6 +227,24 @@ def stackedbar():
     sns= libs["sns"]
     Image= libs["Image"]
 
+    # Group by gender and internet quality, then calculate average exam score
+    
+    grouped_data= df.groupby(['gender', 'internet_quality'])['exam_score'].mean().unstack()
+   
+
+    #create the plot     
+    grouped_data.plot(kind='bar', stacked=True, figsize=(10, 6), cmap='rainbow')
+    width= 0.5
+    # Labels and title
+    plt.xlabel('Gender')
+    plt.ylabel('Average Exam Score')
+    plt.title('Exam Scores by Gender and Internet Quality')
+    plt.legend(title='Internet Quality')
+    plt.tight_layout()
+    plt.savefig('Exam Scores by Gender and Internet quality.png')
+    plt.show()
+
+    
 ```
 
 ```{python}
@@ -345,7 +363,7 @@ def radarplot():
 ```{python}
 #calling all functions
 def main():
-    functions= [import_study_libs, load_study_data, study_clean, Scatterplots, violinplot, heatmap, radarplot] 
+    functions= [import_study_libs, load_study_data, study_clean, Scatterplots, stackedbar, violinplot, heatmap, radarplot] 
     for func in functions:
         func()
 
