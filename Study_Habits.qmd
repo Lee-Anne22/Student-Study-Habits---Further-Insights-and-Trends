@@ -10,10 +10,6 @@ kernal: base
 
 # Data Collection and Preparation
 
-```{python}
-!pip install IPython
-```
-
 ## Collection of Data:
 
 The data collected for this project is provided by Kaggle and thorough preparation of this data were done for machine learning models.
@@ -25,6 +21,8 @@ def import_study_libs():
     import pandas as pd
     import seaborn as sns
     import matplotlib.pyplot as plt
+    import plotly.graph_objects as go
+    import plotly.io as pio
     import sklearn as sk
     from sklearn.model_selection import train_test_split
     from sklearn.model_selection import GridSearchCV
@@ -38,7 +36,7 @@ def import_study_libs():
     import lime as lime
     import shap as shap
     from IPython.display import Image
-    return {"np": np, "pd": pd, "sns": sns, "plt": plt, "train_test_split": train_test_split, "GridSearchCV": GridSearchCV, "StratifiedKFold": StratifiedKFold,
+    return {"np": np, "pd": pd, "sns": sns, "plt": plt, "go": go, "pio": pio, "train_test_split": train_test_split, "GridSearchCV": GridSearchCV, "StratifiedKFold": StratifiedKFold,
             "DecisionTreeClassifier": DecisionTreeClassifier, "plot_tree": plot_tree, "accuracy_score": accuracy_score, "confusion_matrix": confusion_matrix,
             "classification_report":classification_report, "make_scorer": make_scorer, "lime": lime, "shap": shap, "Image": Image}
 
@@ -162,36 +160,54 @@ def Scatterplots():
     libs = import_study_libs()
     plt= libs["plt"]
     sns= libs["sns"]
+    np= libs["np"]
     Image= libs["Image"]
 #Create three scatter plots
-# Scatter plot : Subplot (1) Exam score vs Internet Quality
+# Scatter plot : Subplot (1) Exam score vs Study hours per day
     # Plot Style
     sns.set_style("whitegrid")
     
     # Create figure and subplots
     fig, axs = plt.subplots(1, 3, figsize=(15, 8))  # 1 row, 3 columns
     #Extracting data and giving them variables
-    x1=df["internet_quality"]
+    x1= df['study_hours_per_day']
     x2=df["sleep_hours"]
     x3=df["exercise_frequency"]
     y=df["exam_score"]
 
-    axs[0].scatter(x1, y, color='blue' )
-    axs[0].set_xlabel("Internet Quality")
+    x1_sorted = np.sort(x1)
+    coefficients1 = np.polyfit(x1, y, 1)
+    trendline_function = np.poly1d(coefficients1)
+    axs[0].plot(x1, trendline_function(x1), color='red', linestyle='--', label='Trendline')
+    axs[0].scatter(x1, y, color='blue')
+    axs[0].set_xlabel("Study Hours per Day (hours)")
     axs[0].set_ylabel("Exam Score")
-    axs[0].set_title("Exam Score VS Internet Quality", fontsize=12)
+    axs[0].set_title("Exam Scores VS Study Hours per Day", fontsize=12)
+    correlation1 = np.corrcoef(x1, y)[0, 1]
+    print(f"Correlation between study hours per day and exam score: {correlation1:.2f}")
  
     # Subplot(2) Exam score vs Sleep
+    x2_sorted = np.sort(x2)
+    coefficients2 = np.polyfit(x2, y, 1)
+    trendline_function2 = np.poly1d(coefficients2)
+    axs[1].plot(x2, trendline_function2(x2), color='red', linestyle='--', label='Trendline')
     axs[1].scatter(x2, y, color='green')
-    axs[1].set_xlabel("Sleep Hours")
+    axs[1].set_xlabel("Sleep Hours (hours)")
     axs[1].set_ylabel("Exam Score")
     axs[1].set_title("Exam Scores VS Sleep Hours", fontsize=12)
-    
+    correlation2 = np.corrcoef(x2, y)[0, 1]
+    print(f"Correlation between sleep and exam score: {correlation2:.2f}")
     # Subplot (3): Exam score vs Exercise Frequency
+    x3_sorted = np.sort(x3)
+    coefficients3 = np.polyfit(x3, y, 1)
+    trendline_function3 = np.poly1d(coefficients3)
+    axs[2].plot(x3, trendline_function3(x3), color='red', linestyle='--', label='Trendline')
     axs[2].scatter(x3, y, color='orange')
-    axs[2].set_xlabel("Exercise Frequency")
+    axs[2].set_xlabel("Exercise Frequency (per day)")
     axs[2].set_ylabel("Exam Score")
     axs[2].set_title("Exam Scores VS Exercise Frequency", fontsize=12)
+    correlation3 = np.corrcoef(x3, y)[0, 1]
+    print(f"Correlation between exercise frequency and exam score: {correlation3:.2f}")
     plt.tight_layout()
     
     fig.savefig('ExamScore_vs_Study_Habits.png') #saving plot as png
@@ -280,12 +296,56 @@ def heatmap():
 
 ```{python}
 #Radar Charts
+#comparison of time spent in a day
+def radarplot():
+    #load data
+    df = load_study_data()
+    if df is None:
+        return None 
+    #load libraries
+    libs = import_study_libs()
+    plt= libs["plt"]
+    sns= libs["sns"]
+    go= libs["go"]
+    pio= libs["pio"]
+    Image= libs["Image"]
+    # pio renderer set for radar plot in Quarto but converting to ipynb
+    pio.renderers.default = 'notebook'
+    # extract data and get the averages
+    selected_columns = ['study_hours_per_day', 'social_media_hours', 'netflix_hours', 'sleep_hours']
+    avg_values = df[selected_columns].mean().tolist()
+    categories = selected_columns.copy()
+
+    #Closing the loop
+    categories += [categories[0]]
+    avg_values += [avg_values[0]]
+
+    # Create radar plot
+    fig = go.Figure(
+    data= go.Scatterpolar(
+        r=avg_values,
+        theta=categories,
+        fill='toself',
+        name='Average Time Spent (hours)'))
+    
+    fig.update_layout(
+    margin=dict(l=20, r=20, t=40, b=20),  # reduce left, right, top, bottom margins
+    polar=dict(
+        radialaxis=dict(visible=True, range=[0, max(avg_values) + 1])
+    ),
+    title=dict(text='Radar Plot of Average Daily Time Spent', x=0.5),  # center title
+    showlegend=True
+)
+
+    fig.show()
+
+
 ```
 
 ```{python}
 #calling all functions
 def main():
-    functions= [import_study_libs, load_study_data, study_clean, Scatterplots, violinplot, heatmap] 
+    functions= [import_study_libs, load_study_data, study_clean, Scatterplots, violinplot, heatmap, radarplot] 
     for func in functions:
         func()
 
