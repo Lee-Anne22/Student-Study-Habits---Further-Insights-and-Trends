@@ -27,8 +27,6 @@ this project include a Linear Regression model and a Decision Tree.
 The project started with data cleaning and preparation for the machine
 learning models utilised in this project.
 
-### Data Collection and Preparation
-
 #### <u>Data Loading</u>
 
 The data provided was downloaded as student_habits_performance.csv from
@@ -39,9 +37,14 @@ replication of the project.
 
 #### <u>Preparation</u>
 
-The data was prepared by first cleaning then encoding categorical
-variables. The cleaning process consisted of filling missing values with
-averages and removing any spacing between words.
+The data was first prepared by cleaning which consisted of filling
+missing values with averages and removing any spacing between words.
+After cleaning, encoding of categorical variables ( ‘part-time job’,
+‘diet quality’, ‘internet quality’, and ‘extracurricular activity’)
+using the Sci-kit Learn ‘StandardScaler’ was implemented. These new
+encoded categories were added to a copy of the csv and saved as
+‘student_habits_encoded’.csv which was used for the exploratory data
+analysis and training the machine models.
 
 ### Data Exploration and Model Building
 
@@ -52,11 +55,10 @@ mmm, mmm. After statistical analysis, data exploration began by plotting
 the following plots:
 
 - Scatter plot
-  - The correlation between exam score and internet quality, diet
-    quality, sleep hours and exercise frequency
+  - The correlation between exam score and internet quality, sleep hours
+    and exercise frequency
 - Stacked bar plot
-  - The difference in categories between the following age groups: 16-18
-    years, 19-20 years, 21-22 years and 23-24 years.
+  - The relationship between internet quality and exam scores by gender
 - Violin plot
   - Mental Health rating per age group: 16-18 years, 19-20 years, 21-22
     years and 23-24 years.
@@ -64,8 +66,7 @@ the following plots:
   - To gain multivariate insights between categories
 - Parallel coordinates
 - Radar plot
-  - The difference in time spent between the following age groups: 16-18
-    years, 19-20 years, 21-22 years and 23-24 years.
+  - The average amount of time spent on different habits:
 
     - Amount of study hours - study hours
 

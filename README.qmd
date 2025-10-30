@@ -17,15 +17,13 @@ The project focused on determining the main daily habits which exerted the most 
 
 The project started with data cleaning and preparation for the machine learning models utilised in this project.
 
-### Data Collection and Preparation
-
 #### [Data Loading]{.underline}
 
 The data provided was downloaded as student_habits_performance.csv from Kaggle and load using pandas. After loading of the csv file, the necessary libraries were imported and placed in a import_study_libs class. These libraries can be found in the requirements.txt file for replication of the project.
 
 #### [Preparation]{.underline}
 
-The data was prepared by first cleaning then encoding categorical variables. The cleaning process consisted of filling missing values with averages and removing any spacing between words.
+The data was first prepared by cleaning which consisted of filling missing values with averages and removing any spacing between words. After cleaning, encoding of categorical variables ( 'part-time job', 'diet quality', 'internet quality', and 'extracurricular activity') using the Sci-kit Learn 'StandardScaler' was implemented. These new encoded categories were added to a copy of the csv and saved as 'student_habits_encoded'.csv which was used for the exploratory data analysis and training the machine models.
 
 ### Data Exploration and Model Building
 
@@ -34,16 +32,16 @@ The data was prepared by first cleaning then encoding categorical variables. The
 Data exploration began with statistical analysis consisting of mmmm, mmm, mmm. After statistical analysis, data exploration began by plotting the following plots:
 
 -   Scatter plot
-    -   The correlation between exam score and internet quality, diet quality, sleep hours and exercise frequency
+    -   The correlation between exam score and internet quality, sleep hours and exercise frequency
 -   Stacked bar plot
-    -   The difference in categories between the following age groups: 16-18 years, 19-20 years, 21-22 years and 23-24 years.
+    -   The relationship between internet quality and exam scores by gender
 -   Violin plot
     -   Mental Health rating per age group: 16-18 years, 19-20 years, 21-22 years and 23-24 years.
 -   Heatmap
     -   To gain multivariate insights between categories
 -   Parallel coordinates
 -   Radar plot
-    -   The difference in time spent between the following age groups: 16-18 years, 19-20 years, 21-22 years and 23-24 years.
+    -   The average amount of time spent on different habits:
 
         -   Amount of study hours - study hours
 
