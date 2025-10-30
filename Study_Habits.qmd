@@ -24,6 +24,7 @@ def import_study_libs():
     import plotly.graph_objects as go
     import plotly.io as pio
     import sklearn as sk
+    from sklearn.preprocessing import StandardScaler
     from sklearn.model_selection import train_test_split
     from sklearn.model_selection import GridSearchCV
     from sklearn.model_selection import StratifiedKFold
@@ -36,22 +37,37 @@ def import_study_libs():
     import lime as lime
     import shap as shap
     from IPython.display import Image
-    return {"np": np, "pd": pd, "sns": sns, "plt": plt, "go": go, "pio": pio, "train_test_split": train_test_split, "GridSearchCV": GridSearchCV, "StratifiedKFold": StratifiedKFold,
+    return {"np": np, "pd": pd, "sns": sns, "plt": plt, "go": go, "pio": pio, "sk": sk, "StandardScaler": StandardScaler, "train_test_split": train_test_split, "GridSearchCV": GridSearchCV, "StratifiedKFold": StratifiedKFold,
             "DecisionTreeClassifier": DecisionTreeClassifier, "plot_tree": plot_tree, "accuracy_score": accuracy_score, "confusion_matrix": confusion_matrix,
             "classification_report":classification_report, "make_scorer": make_scorer, "lime": lime, "shap": shap, "Image": Image}
 
 # Loading the data set
-file= "student_habits_performance.csv"
-def load_study_data():
+original_file= "student_habits_performance.csv"
+def load_study_data_original():
     try:
-        libs= import_study_libs()
-        pd= libs["pd"]
-        df= pd.read_csv(file, sep=';')
-        df.columns=df.columns.str.strip() #To clean up data
-        print ("Data Loaded Succesfully!")
-        return df
+        libs = import_study_libs()
+        pd = libs["pd"]
+
+        # Use correct delimiter and updated error handling
+        df = pd.read_csv(original_file, sep=';', encoding='utf-8', on_bad_lines='skip')
+
+        # Normalize column names
+        df.columns = df.columns.str.strip().str.lower().str.replace(" ", "_")
+        df_missing = df.fillna(df.mean(numeric_only=True))
+        df_duplicates = df_missing.drop_duplicates()
+
+        df_clean = df_duplicates[
+        (df_duplicates["sleep_hours"] + df_duplicates["social_media_hours"] +
+         df_duplicates["netflix_hours"] + df_duplicates["study_hours_per_day"] <= 24) &
+        (df_duplicates["sleep_hours"] >= 0) &
+        (df_duplicates["age"].between(16, 24))
+    ]
+
+        print("Data Cleaned and Loaded Successfully!")
+      
+        return df_clean
     except FileNotFoundError:
-        print (f"File not found!: {file}")
+        print(f"File not found: {original_file}")
         return None
         
 ```
@@ -63,31 +79,85 @@ Data is prepped by removing missing values, selecting the age range, encoding ca
 ```{python}
 # Handle missing Values and duplicates:
 def study_clean():
-    df = load_study_data()
+    df = load_study_data_original()
     if df is None:
         return None  # Exit early if loading failed
 
     libs = import_study_libs()
     pd = libs["pd"]
     np = libs["np"]
-
-    print(f"Data size:\n{df.head()}\n")
+#Print column headings, shape, statistical data and info on null values
+    
+    print ("Column Headings:")
+    for col in df.columns:
+        print(col)
+    
     print(f"Data shape: {df.shape}\n")
     print(f"Data Statistics:\n{df.describe()}\n")
+    print(f"Data information: {df.info()}")
 
-    df_missing = df.fillna(df.mean(numeric_only=True))
-    df_duplicates = df_missing.drop_duplicates()
+##Normalisation and standardisation of categories for machine models
 
-    df_clean = df_duplicates[
-        (df_duplicates["sleep_hours"] + df_duplicates["social_media_hours"] +
-         df_duplicates["netflix_hours"] + df_duplicates["study_hours_per_day"] <= 24) &
-        (df_duplicates["sleep_hours"] >= 0) &
-        (df_duplicates["age"].between(16, 24))
+def standardize_features(target_column="exam_score", id_column="student_id", save=True):
+    #import libraries
+    libs = import_study_libs()
+    pd = libs["pd"]
+    scaler = libs["StandardScaler"]
+
+    # Load and clean data
+    df = load_study_data_original()
+    if df is None:
+        print("Data loading failed. Cannot proceed with standardization.")
+        return None
+
+    df_encoded = df.copy()
+
+    # Binary encoding
+    df_encoded["part_time_job_encoded"] = df_encoded["part_time_job"].map({"No": 0, "Yes": 1})
+    df_encoded["extracurricular_encoded"] = df_encoded["extracurricular_participation"].map({"No": 0, "Yes": 1})
+
+    # Ordinal encoding
+    df_encoded["internet_quality_encoded"] = df_encoded["internet_quality"].map({"poor": 0, "average": 1, "good": 2})
+    df_encoded["diet_quality_encoded"] = df_encoded["diet_quality"].map({"poor": 0, "average": 1, "good": 2})
+
+    # Define modeling features
+    modeling_features = [
+        "age", "study_hours_per_day", "social_media_hours", "netflix_hours",
+        "attendance_percentage", "sleep_hours", "mental_health_rating",
+        "exercise_frequency", "internet_quality_encoded", "diet_quality_encoded",
+        "part_time_job_encoded", "extracurricular_encoded", target_column
     ]
 
-    print("Data preprocessed and cleaned!")
-    return df_clean
-    
+    # Check for missing columns
+    missing_cols = [col for col in modeling_features if col not in df_encoded.columns]
+    if missing_cols:
+        print(f"Missing columns in dataset: {missing_cols}")
+        return None, None, None
+
+    # Separate features and target
+    X = df_encoded[modeling_features].drop(columns=[target_column])
+    y = df_encoded[target_column]
+    X_scaled = scaler().fit_transform(X)
+
+    # Save enriched dataset
+    if save:
+        df_encoded.to_csv("student_habits_encoded.csv", index=False)
+        print("Encoded dataset saved as 'student_habits_encoded.csv'")
+
+    return X_scaled, y, df_encoded
+```
+
+```{python}
+#New function to load new encoded csv
+def load_study_data():    
+    try:
+        libs= import_study_libs()
+        pd= libs["pd"]
+        df= pd.read_csv("student_habits_encoded.csv", sep=',')
+        return df
+    except FileNotFoundError:
+        print (f"File not found!: {file}")
+        return None
 
 ```
 
@@ -102,17 +172,6 @@ The data was first explored by applied statistical in three ways:
 -   Correlation between sleep and exam scores
 
 -   Outlier detection
-
-```{python}
-# Statistical Analysis
-def stats():
-    data= study_clean()
-    df=data["df_clean"]
-    #Get data statistical analysis after cleaning
-    return data.columns, data.describe()
-
-
-```
 
 ## Data Exploration:
 
@@ -229,8 +288,10 @@ def stackedbar():
 
     # Group by gender and internet quality, then calculate average exam score
     
-    grouped_data= df.groupby(['gender', 'internet_quality'])['exam_score'].mean().unstack()
-   
+    #grouped_data= df.groupby(['gender','exam_score'])['internet_quality'].size().unstack(fill_value=0)
+    ordered_quality = ['Poor', 'Average', 'Good']
+    grouped_data = df.groupby(['gender', 'internet_quality'])['exam_score'].mean().unstack()
+    grouped_data = grouped_data[ordered_quality]
 
     #create the plot     
     grouped_data.plot(kind='bar', stacked=True, figsize=(10, 6), cmap='rainbow')
@@ -240,6 +301,7 @@ def stackedbar():
     plt.ylabel('Average Exam Score')
     plt.title('Exam Scores by Gender and Internet Quality')
     plt.legend(title='Internet Quality')
+    plt.ylim(0, 100)  # Since scores are out of 100
     plt.tight_layout()
     plt.savefig('Exam Scores by Gender and Internet quality.png')
     plt.show()
@@ -363,7 +425,7 @@ def radarplot():
 ```{python}
 #calling all functions
 def main():
-    functions= [import_study_libs, load_study_data, study_clean, Scatterplots, stackedbar, violinplot, heatmap, radarplot] 
+    functions= [import_study_libs, load_study_data_original, standardize_features, load_study_data, study_clean, Scatterplots, stackedbar, violinplot, heatmap, radarplot] 
     for func in functions:
         func()
 
@@ -389,6 +451,29 @@ The following categories were considered in the linear regression model:
 The categories expected to be most profitable were increased to predict the impact on exam score. These categories were: sleep hours, study hours and exercise frequency.
 
 ```{python}
+# Excluding categorical data and checking correlation
+def exclude_cat():
+    df = load_study_data()
+    if df is None:
+        return None
+    libs = import_study_libs()
+    plt = libs["plt"]
+    sns = libs["sns"]
+    np = libs["np"]
+
+    # Select only numeric columns
+    numeric_df = df.select_dtypes(include=[np.number])
+
+    # Check if any numeric columns exist
+    if numeric_df.empty:
+        print("No numeric columns found for correlation.")
+        return
+
+    # Compute and print correlation matrix
+    print("Correlation matrix:")
+    print(numeric_df.corr())
+exclude_cat()
+
 
 ```
 
