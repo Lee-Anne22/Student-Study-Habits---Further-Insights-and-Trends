@@ -14,6 +14,8 @@ kernal: base
 
 The data collected for this project is provided by Kaggle and thorough preparation of this data were done for machine learning models.
 
+First, a library import function is created to import all necessary libraries.
+
 ```{python}
 #Importing all necessary programs
 def import_study_libs():
@@ -25,6 +27,12 @@ def import_study_libs():
     import plotly.io as pio
     import sklearn as sk
     from sklearn.preprocessing import StandardScaler
+    from sklearn.preprocessing import MinMaxScaler
+    from sklearn.feature_selection import RFE
+    from sklearn.linear_model import LinearRegression
+    from sklearn.exceptions import NotFittedError
+    import statsmodels.api as sm
+    from statsmodels.stats.outliers_influence import variance_inflation_factor 
     from sklearn.model_selection import train_test_split
     from sklearn.model_selection import GridSearchCV
     from sklearn.model_selection import StratifiedKFold
@@ -34,131 +42,208 @@ def import_study_libs():
     from sklearn.metrics import confusion_matrix
     from sklearn.metrics import classification_report
     from sklearn.metrics import make_scorer
+    from sklearn.metrics import roc_curve
+    from sklearn.metrics import roc_auc_score
+    from sklearn.metrics import mean_squared_error
+    from sklearn.metrics import mean_absolute_error
+    from sklearn.metrics import r2_score
     import lime as lime
+    import lime.lime_tabular
     import shap as shap
     from IPython.display import Image
-    return {"np": np, "pd": pd, "sns": sns, "plt": plt, "go": go, "pio": pio, "sk": sk, "StandardScaler": StandardScaler, "train_test_split": train_test_split, "GridSearchCV": GridSearchCV, "StratifiedKFold": StratifiedKFold,
-            "DecisionTreeClassifier": DecisionTreeClassifier, "plot_tree": plot_tree, "accuracy_score": accuracy_score, "confusion_matrix": confusion_matrix,
-            "classification_report":classification_report, "make_scorer": make_scorer, "lime": lime, "shap": shap, "Image": Image}
+    return {"np": np, "pd": pd, "sns": sns, "plt": plt, "go": go, "pio": pio, "sk": sk, "MinMaxScaler": MinMaxScaler, "StandardScaler": StandardScaler, "RFE": RFE, "LinearRegression": LinearRegression, "NotFittedError": NotFittedError, "sm": sm, "variance_inflation_factor": variance_inflation_factor, "train_test_split": train_test_split, "GridSearchCV": GridSearchCV, "StratifiedKFold": StratifiedKFold,
+            "DecisionTreeClassifier": DecisionTreeClassifier, "plot_tree": plot_tree, "accuracy_score": accuracy_score, "confusion_matrix": confusion_matrix, "roc_curve": roc_curve, "roc_auc_score": roc_auc_score, "mean_squared_error": mean_squared_error, "mean_absolute_error": mean_absolute_error, "r2_score": r2_score,
+            "classification_report":classification_report, "make_scorer": make_scorer, "lime": lime, "lime_tabular": lime.lime_tabular, "shap": shap, "Image": Image}
 
+#calling function
+import_study_libs()
+```
+
+## Data loading:
+
+The CSV file is then loaded using a load_study_data_original function and the data is normalised in a second function.
+
+```{python}
 # Loading the data set
 original_file= "student_habits_performance.csv"
 def load_study_data_original():
     try:
         libs = import_study_libs()
         pd = libs["pd"]
+        np= libs["np"]
 
         # Use correct delimiter and updated error handling
+        df = pd.read_csv(original_file, sep=';', encoding='utf-8', on_bad_lines='skip')
+        #Checking data
+        print ("Column Headings:")
+        for col in df.columns:
+            print(col)
+        
+        print(f"Data shape: {df.shape}\n")
+        print(f"Data Statistics:\n{df.describe()}\n")
+        print(f"Data information: {df.info()}")
+                       
+        print("Loaded Successfully!")
+      
+        return df
+    except FileNotFoundError:
+        print(f"File not found: {original_file}")
+        return None
+#calling function
+load_study_data_original()
+```
+
+```{python}
+# Loading the data set and saving a cleaned version for EDA
+original_file = "student_habits_performance.csv"
+
+def normalised_data(save=True):
+    try:
+        libs = import_study_libs()
+        pd = libs["pd"]
+
+        # Load CSV
         df = pd.read_csv(original_file, sep=';', encoding='utf-8', on_bad_lines='skip')
 
         # Normalize column names
         df.columns = df.columns.str.strip().str.lower().str.replace(" ", "_")
-        df_missing = df.fillna(df.mean(numeric_only=True))
-        df_duplicates = df_missing.drop_duplicates()
+        df = df.fillna(df.mean(numeric_only=True))
+        df = df.drop_duplicates()
 
-        df_clean = df_duplicates[
-        (df_duplicates["sleep_hours"] + df_duplicates["social_media_hours"] +
-         df_duplicates["netflix_hours"] + df_duplicates["study_hours_per_day"] <= 24) &
-        (df_duplicates["sleep_hours"] >= 0) &
-        (df_duplicates["age"].between(16, 24))
-    ]
+        # Normalize string columns
+        for col in df.select_dtypes(include=['object']).columns:
+            df[col] = df[col].str.strip().str.lower()
+        df = df.map(lambda x: x.strip().lower() if isinstance(x, str) else x)
 
-        print("Data Cleaned and Loaded Successfully!")
-      
-        return df_clean
+        # filters
+        df = df[
+            (df["sleep_hours"] + df["social_media_hours"] +
+             df["netflix_hours"] + df["study_hours_per_day"] <= 24) &
+            (df["sleep_hours"] >= 0) &
+            (df["age"].between(16, 24))
+        ]
+
+        # Count NaNs
+        print(df.isna().sum())
+        print("Data Normalised!")
+
+        # Save if requested
+        if save:
+            df.to_csv("student_habits_EDA.csv", index=False)
+            print("Normalised dataset saved as 'student_habits_EDA.csv'")
+
+        return df
+
     except FileNotFoundError:
         print(f"File not found: {original_file}")
         return None
         
+new_data=normalised_data()
+```
+
+```{python}
+def EDA_data():
+    try:
+        libs= import_study_libs()
+        pd= libs["pd"]
+        df= pd.read_csv("student_habits_EDA.csv", sep=',', encoding='utf-8', on_bad_lines='skip')
+        return df
+    except FileNotFoundError:
+        print(f"File not found: {original_file}")
+        return None
+
+#calling function    
+EDA_data()
+
 ```
 
 ## Preparation of Data:
 
-Data is prepped by removing missing values, selecting the age range, encoding categorical values and normalising numeric variables.
+Data is prepped by standardisation and encoding for machine learning models to be used later.
 
 ```{python}
-# Handle missing Values and duplicates:
-def study_clean():
-    df = load_study_data_original()
-    if df is None:
-        return None  # Exit early if loading failed
-
-    libs = import_study_libs()
-    pd = libs["pd"]
-    np = libs["np"]
-#Print column headings, shape, statistical data and info on null values
-    
-    print ("Column Headings:")
-    for col in df.columns:
-        print(col)
-    
-    print(f"Data shape: {df.shape}\n")
-    print(f"Data Statistics:\n{df.describe()}\n")
-    print(f"Data information: {df.info()}")
-
-##Normalisation and standardisation of categories for machine models
-
+##Standardisation of categories for machine models
 def standardize_features(target_column="exam_score", id_column="student_id", save=True):
-    #import libraries
-    libs = import_study_libs()
-    pd = libs["pd"]
-    scaler = libs["StandardScaler"]
-
-    # Load and clean data
-    df = load_study_data_original()
+    df = normalised_data()
     if df is None:
         print("Data loading failed. Cannot proceed with standardization.")
         return None
 
+    libs = import_study_libs()
+    pd = libs["pd"]
+    scaler = libs["StandardScaler"]
+
+    # Fill NaNs in parental education
+    if not df['parental_education_level'].mode().empty:
+        df['parental_education_level'] = df['parental_education_level'].fillna(df['parental_education_level'].mode()[0])
+    else:
+        df['parental_education_level'] = df['parental_education_level'].fillna("unknown")
+
+    # Copy for encoding
     df_encoded = df.copy()
 
-    # Binary encoding
-    df_encoded["part_time_job_encoded"] = df_encoded["part_time_job"].map({"No": 0, "Yes": 1})
-    df_encoded["extracurricular_encoded"] = df_encoded["extracurricular_participation"].map({"No": 0, "Yes": 1})
+   #binary encoding
+    df_encoded["part_time_job_encoded"] = df_encoded["part_time_job"].map({"no": 0, "yes": 1})
+    df_encoded["extracurricular_encoded"] = df_encoded["extracurricular_participation"].map({"no": 0, "yes": 1})
 
-    # Ordinal encoding
-    df_encoded["internet_quality_encoded"] = df_encoded["internet_quality"].map({"poor": 0, "average": 1, "good": 2})
-    df_encoded["diet_quality_encoded"] = df_encoded["diet_quality"].map({"poor": 0, "average": 1, "good": 2})
+    #ordinal encoding
+    df_encoded["internet_quality_encoded"] = (
+        df_encoded["internet_quality"].astype(str).str.strip().str.lower().map({"poor": 0, "average": 1, "good": 2})
+    )
+    df_encoded["diet_quality_encoded"] = (
+        df_encoded["diet_quality"].astype(str).str.strip().str.lower().map({"poor": 0, "fair": 1, "good": 2})
+    )
+
+    # gender encoding 
+    df_encoded["gender_encoded"] = df_encoded["gender"].map({"other": 2, "male": 1, "female": 0})
+
+    # drop raw categorical + ID + parental education ---
+    drop_cols = [id_column, "part_time_job", "extracurricular_participation",
+        "internet_quality", "diet_quality", "gender", "parental_education_level"
+    ]
+    df_encoded = df_encoded.drop(columns=[c for c in drop_cols if c in df_encoded.columns])
 
     # Define modeling features
     modeling_features = [
         "age", "study_hours_per_day", "social_media_hours", "netflix_hours",
         "attendance_percentage", "sleep_hours", "mental_health_rating",
         "exercise_frequency", "internet_quality_encoded", "diet_quality_encoded",
-        "part_time_job_encoded", "extracurricular_encoded", target_column
+        "part_time_job_encoded", "extracurricular_encoded", "gender_encoded",
+        target_column
     ]
 
-    # Check for missing columns
-    missing_cols = [col for col in modeling_features if col not in df_encoded.columns]
-    if missing_cols:
-        print(f"Missing columns in dataset: {missing_cols}")
-        return None, None, None
-
-    # Separate features and target
     X = df_encoded[modeling_features].drop(columns=[target_column])
     y = df_encoded[target_column]
+
+    # Scale numeric features
     X_scaled = scaler().fit_transform(X)
 
-    # Save enriched dataset
     if save:
-        df_encoded.to_csv("student_habits_encoded.csv", index=False)
+        df_encoded.to_csv("Encoded_student_habits.csv", index=False)
         print("Encoded dataset saved as 'student_habits_encoded.csv'")
 
+    # Return only encoded dataset
     return X_scaled, y, df_encoded
+standardize_features()
 ```
+
+## New CSV file:
+
+The new encoded data is saved as student_habits_encoded.csv which is imported into a new data loader function to be used through the project.
 
 ```{python}
 #New function to load new encoded csv
-def load_study_data():    
+def ml_data():    
     try:
         libs= import_study_libs()
         pd= libs["pd"]
-        df= pd.read_csv("student_habits_encoded.csv", sep=',')
+        df= pd.read_csv("Encoded_student_habits.csv", sep=',')
         return df
     except FileNotFoundError:
         print (f"File not found!: {file}")
         return None
-
+#calling function    
+ml_data()
 ```
 
 # Data Exploration and Model Building
@@ -212,7 +297,7 @@ Data were explored and the following plots were obtained:
 ```{python}
 def Scatterplots():
 #Import libraries
-    df = load_study_data()
+    df = EDA_data()
     if df is None:
         return None 
         
@@ -272,12 +357,13 @@ def Scatterplots():
     fig.savefig('ExamScore_vs_Study_Habits.png') #saving plot as png
     plt.show()
 
+Scatterplots()
 ```
 
 ```{python}
 #Stacked bar plot1: Difference in age groups
 def stackedbar():
-    df = load_study_data()
+    df = EDA_data()
     if df is None:
         return None 
         
@@ -289,7 +375,7 @@ def stackedbar():
     # Group by gender and internet quality, then calculate average exam score
     
     #grouped_data= df.groupby(['gender','exam_score'])['internet_quality'].size().unstack(fill_value=0)
-    ordered_quality = ['Poor', 'Average', 'Good']
+    ordered_quality = ['poor', 'average', 'good']
     grouped_data = df.groupby(['gender', 'internet_quality'])['exam_score'].mean().unstack()
     grouped_data = grouped_data[ordered_quality]
 
@@ -306,14 +392,14 @@ def stackedbar():
     plt.savefig('Exam Scores by Gender and Internet quality.png')
     plt.show()
 
-    
+stackedbar()
 ```
 
 ```{python}
 #Violin plot: Mental Health rating per age group: 16-18 years, 19-20 years, 21-22 years and 23-24 years
 def violinplot():
     #import libraries
-    df = load_study_data()
+    df = EDA_data()
     if df is None:
         return None 
         
@@ -340,13 +426,15 @@ def violinplot():
     #save figure and show
     fig.savefig('mental_health_rating_across_age_groups.png')
     plt.show()
+
+violinplot()
 ```
 
 ```{python}
 #Heatmap
 def heatmap():
     #import libraries
-    df = load_study_data()
+    df = EDA_data()
     if df is None:
         return None 
         
@@ -368,6 +456,8 @@ def heatmap():
     plt.tight_layout()
     fig.savefig('Heatmap.png')
     plt.show()
+    
+heatmap()
 ```
 
 ```{python}
@@ -379,7 +469,7 @@ def heatmap():
 #comparison of time spent in a day
 def radarplot():
     #load data
-    df = load_study_data()
+    df = EDA_data()
     if df is None:
         return None 
     #load libraries
@@ -419,18 +509,7 @@ def radarplot():
 
     fig.show()
 
-
-```
-
-```{python}
-#calling all functions
-def main():
-    functions= [import_study_libs, load_study_data_original, standardize_features, load_study_data, study_clean, Scatterplots, stackedbar, violinplot, heatmap, radarplot] 
-    for func in functions:
-        func()
-
-if __name__== '__main__':
-    main()
+radarplot()
 ```
 
 ## Model Building:
@@ -441,58 +520,416 @@ The linear regression model and decision tree model were trained for this projec
 
 The following categories were considered in the linear regression model:
 
+-   Age (removed after checking VIF the first time, VIF is too high. Also age is not a habit and was excluded due to these reasons.)
 -   Study hours
 -   Sleep hours
 -   Social Media hours
 -   Netflix hours
 -   Exercise frequency
+-   Diet quality
+-   Internet quality
+-   Mental Health Rating
 -   Predicted Exam Score
 
 The categories expected to be most profitable were increased to predict the impact on exam score. These categories were: sleep hours, study hours and exercise frequency.
 
+## Linear Regression Model: Built, Test, Evaluated and Compared
+
 ```{python}
-# Excluding categorical data and checking correlation
-def exclude_cat():
-    df = load_study_data()
+#Already encoded and scaled data
+#Can train and split directly
+
+def train_LR():
+    libs = import_study_libs()
+    train_test_split = libs["train_test_split"]
+    MinMaxScaler = libs["MinMaxScaler"]
+
+    df = ml_data()
     if df is None:
         return None
+
+    # features and target
+    X = df[[
+        "attendance_percentage", "study_hours_per_day", "social_media_hours", "netflix_hours",
+        "sleep_hours", "exercise_frequency", "mental_health_rating", "part_time_job_encoded",
+        "extracurricular_encoded", "internet_quality_encoded", "diet_quality_encoded", "gender_encoded"
+    ]]
+    y = df["exam_score"]
+
+    #split
+    X_train, X_test, y_train, y_test = train_test_split(
+        X, y, train_size=0.8, test_size=0.2, random_state=100
+    )
+
+    #scale numeric features
+    scaler = MinMaxScaler()
+    X_train_scaled = scaler.fit_transform(X_train)
+    X_test_scaled = scaler.transform(X_test)
+
+    return {
+        "X_train": X_train,
+        "X_test": X_test,
+        "y_train": y_train,
+        "y_test": y_test,
+        "X_train_scaled": X_train_scaled,
+        "X_test_scaled": X_test_scaled,
+        "feature_names": X.columns
+    }
+
+
+#statsmodels OLS for inference
+def model_build(X, y):
+    libs = import_study_libs()
+    sm = libs["sm"]
+    pd = libs["pd"]
+
+    # Ensure numeric
+    X = X.apply(pd.to_numeric, errors="coerce")
+    y = pd.to_numeric(y, errors="coerce")
+
+    # Drop NaNs
+    mask = X.notnull().all(axis=1) & y.notnull()
+    X, y = X.loc[mask], y.loc[mask]
+
+    # Fit OLS
+    X_const = sm.add_constant(X)
+    lm = sm.OLS(y, X_const).fit()
+    print(lm.summary())
+    return lm
+
+
+#VIF Check
+def checkVIF(X):
+    libs = import_study_libs()
+    pd = libs["pd"]
+    variance_inflation_factor = libs["variance_inflation_factor"]
+
+    vif_df = pd.DataFrame()
+    vif_df["Features"] = X.columns
+    vif_df["VIF"] = [variance_inflation_factor(X.values, i) for i in range(X.shape[1])]
+    vif_df["VIF"] = round(vif_df["VIF"], 2)
+    return vif_df.sort_values(by="VIF", ascending=False)
+
+
+# Evaluation with Train vs Test model
+def evaluate_model(model, X_train, y_train, X_test, y_test):
+    libs = import_study_libs()
+    mean_squared_error = libs["mean_squared_error"]
+    r2_score = libs["r2_score"]
+
+    #predicted model
+    y_train_pred = model.predict(X_train)
+    y_test_pred = model.predict(X_test)
+
+    #trained model
+    train_mse = mean_squared_error(y_train, y_train_pred)
+    train_r2 = r2_score(y_train, y_train_pred)
+
+    #test model
+    test_mse = mean_squared_error(y_test, y_test_pred)
+    test_r2 = r2_score(y_test, y_test_pred)
+
+    return {
+        "train_mse": train_mse,
+        "train_r2": train_r2,
+        "test_mse": test_mse,
+        "test_r2": test_r2,
+        "train_predictions": y_train_pred,
+        "test_predictions": y_test_pred
+    }
+
+
+# call function train_lr
+data_dict = train_LR()
+print("Train shape:", data_dict["X_train"].shape, "Test shape:", data_dict["X_test"].shape)
+
+#train scikit-learn Linear Regression
+libs = import_study_libs()
+LinearRegression = libs["LinearRegression"]
+lr = LinearRegression()
+lr.fit(data_dict["X_train_scaled"], data_dict["y_train"])
+
+#Evaluate with trained vs tested comparison
+results = evaluate_model(
+    lr,
+    data_dict["X_train_scaled"], data_dict["y_train"],
+    data_dict["X_test_scaled"], data_dict["y_test"]
+)
+
+print("\n--- Model Evaluation ---")
+print("Train MSE:", results["train_mse"])
+print("Train R²:", results["train_r2"])
+print("Test MSE:", results["test_mse"])
+print("Test R²:", results["test_r2"])
+
+# Statsmodels OLS summary (inference)
+X, y = data_dict["X_train"], data_dict["y_train"]
+lm = model_build(X, y)
+print("OLS Train R²:", lm.rsquared)
+
+# VIF check
+print("\n--- Variance Inflation Factors ---")
+print(checkVIF(X))
+```
+
+## Linear Regression: Evaluation Visualisation
+
+```{python}
+# New code block: define the visualization function
+def plot_model_evaluation(y_train, y_train_pred, y_test, y_test_pred):
     libs = import_study_libs()
     plt = libs["plt"]
-    sns = libs["sns"]
-    np = libs["np"]
 
-    # Select only numeric columns
-    numeric_df = df.select_dtypes(include=[np.number])
+    fig, axes = plt.subplots(1, 2, figsize=(12, 5))
 
-    # Check if any numeric columns exist
-    if numeric_df.empty:
-        print("No numeric columns found for correlation.")
-        return
+    # --- Train set ---
+    axes[0].scatter(y_train, y_train_pred, color="blue", alpha=0.6)
+    axes[0].plot([y_train.min(), y_train.max()], [y_train.min(), y_train.max()], "r--")
+    axes[0].set_title("Train Set: Actual vs Predicted")
+    axes[0].set_xlabel("Actual Exam Score")
+    axes[0].set_ylabel("Predicted Exam Score")
 
-    # Compute and print correlation matrix
-    print("Correlation matrix:")
-    print(numeric_df.corr())
-exclude_cat()
+    # --- Test set ---
+    axes[1].scatter(y_test, y_test_pred, color="green", alpha=0.6)
+    axes[1].plot([y_test.min(), y_test.max()], [y_test.min(), y_test.max()], "r--")
+    axes[1].set_title("Test Set: Actual vs Predicted")
+    axes[1].set_xlabel("Actual Exam Score")
+    axes[1].set_ylabel("Predicted Exam Score")
 
+    plt.tight_layout()
+    plt.show()
+    return axes
+
+# Predictions
+y_train_pred = lr.predict(data_dict["X_train_scaled"])
+y_test_pred = lr.predict(data_dict["X_test_scaled"])
+
+# Plot evaluation
+plot_model_evaluation(
+    data_dict["y_train"], y_train_pred,
+    data_dict["y_test"], y_test_pred
+)
 
 ```
 
-##### Decision Tree
-
-A decision tree was utilised to predict whether a student would obtain an exam score above 75% or not.
-
-#Note to self: Need to change the following categories:
-
--   part-time -\> 0 or 1 (binary class)
-
--   diet quality (multi-class)
-
--   parental education (multi-class)
-
--   internet quality (multi-class)
-
--   extracurricular activity -\> 0 or 1 (binary class)
+# Decision Tree Classifier
 
 ```{python}
+def optimise_decision_tree():
+    libs = import_study_libs()
+    pd = libs["pd"]
+    train_test_split = libs["train_test_split"]
+    DecisionTreeClassifier = libs["DecisionTreeClassifier"]
+    GridSearchCV = libs["GridSearchCV"]
+    accuracy_score = libs["accuracy_score"]
+    confusion_matrix = libs["confusion_matrix"]
+    classification_report = libs["classification_report"]
+
+    # Load encoded dataset
+    df = ml_data()
+
+    # Create binary target: 1 if exam_score >= 75, else 0
+    df["above_75"] = (df["exam_score"] >= 75).astype(int)
+
+    # Features and target
+    X = df.drop(columns=["exam_score", "above_75"])
+    y = df["above_75"]
+
+    # Train/test split
+    X_train, X_test, y_train, y_test = train_test_split(
+        X, y, test_size=0.2, random_state=42, stratify=y
+    )
+
+    # Define parameter grid
+    param_grid = {
+    "max_depth": [3, 5, None],
+    "min_samples_split": [2, 5],
+    "min_samples_leaf": [1, 2],
+}
+    # GridSearchCV
+    grid_search = GridSearchCV(
+        estimator=DecisionTreeClassifier(random_state=42),
+        param_grid=param_grid,
+        cv=5,
+        scoring="accuracy",
+        n_jobs=1
+    )
+
+    grid_search.fit(X_train, y_train)
+
+    # Best model
+    best_model = grid_search.best_estimator_
+
+    # Evaluate on test set
+    y_pred = best_model.predict(X_test)
+    print("Best Parameters:", grid_search.best_params_)
+    print("Cross-validated Best Score:", grid_search.best_score_)
+    print("Test Accuracy:", accuracy_score(y_test, y_pred))
+    print("\nConfusion Matrix:\n", confusion_matrix(y_test, y_pred))
+    print("\nClassification Report:\n", classification_report(y_test, y_pred))
+
+    return best_model, grid_search, X_train, X_test, y_train, y_test
+best_tree, grid_search, X_train, X_test, y_train, y_test = optimise_decision_tree()
+#ROC Curve
+def plot_tree_roc(model, X_test, y_test):
+    libs = import_study_libs()
+    roc_curve = libs["roc_curve"]
+    roc_auc_score = libs["roc_auc_score"]
+    plt = libs["plt"]
+
+    # y_test is already binary (0 = below 75, 1 = above 75)
+    y_true_binary = y_test  
+
+    # Predicted probabilities for the positive class
+    y_probs = model.predict_proba(X_test)[:, 1]
+
+    # Compute ROC curve and AUC
+    fpr, tpr, _ = roc_curve(y_true_binary, y_probs)
+    auc = roc_auc_score(y_true_binary, y_probs)
+
+    # Plot
+    plt.figure(figsize=(7, 6))
+    plt.plot(fpr, tpr, color="blue", label=f"Decision Tree (AUC = {auc:.2f})")
+    plt.plot([0, 1], [0, 1], color="red", linestyle="--")
+    plt.xlabel("False Positive Rate")
+    plt.ylabel("True Positive Rate")
+    plt.title("ROC Curve - Decision Tree Classifier")
+    plt.legend(loc="lower right")
+    plt.show()
+
+    print("Decision Tree AUC:", auc)
+    return auc
+    
+best_tree, grid_search, X_train, X_test, y_train, y_test = optimise_decision_tree()
+auc_score = plot_tree_roc(best_tree, X_test, y_test)
+```
+
+## Compare Machine Models: ROC Curve Comparison
+
+```{python}
+def compare_models_roc(lr_model, tree_model, X_test_scaled, X_test, y_test_binary):
+    libs = import_study_libs()
+    roc_curve = libs["roc_curve"]
+    roc_auc_score = libs["roc_auc_score"]
+    plt = libs["plt"]
+
+    # --- Decision Tree probabilities ---
+    y_probs_tree = tree_model.predict_proba(X_test)[:, 1]
+    fpr_tree, tpr_tree, _ = roc_curve(y_test_binary, y_probs_tree)
+    auc_tree = roc_auc_score(y_test_binary, y_probs_tree)
+
+    # --- Linear Regression predictions (continuous exam scores) ---
+    y_pred_lr = lr_model.predict(X_test_scaled)
+    fpr_lr, tpr_lr, _ = roc_curve(y_test_binary, y_pred_lr)
+    auc_lr = roc_auc_score(y_test_binary, y_pred_lr)
+
+    # --- Plot both curves ---
+    plt.figure(figsize=(7, 6))
+    plt.plot(fpr_tree, tpr_tree, color="blue", label=f"Decision Tree (AUC = {auc_tree:.2f})")
+    plt.plot(fpr_lr, tpr_lr, color="green", label=f"Linear Regression (AUC = {auc_lr:.2f})")
+    plt.plot([0, 1], [0, 1], color="red", linestyle="--")
+
+    plt.xlabel("False Positive Rate")
+    plt.ylabel("True Positive Rate")
+    plt.title("ROC Curve Comparison: Decision Tree vs Linear Regression")
+    plt.legend(loc="lower right")
+    plt.show()
+
+# From optimise_decision_tree()
+best_tree, grid_search, X_train, X_test, y_train, y_test = optimise_decision_tree()
+
+# y_test is already binary (0/1) from optimise_decision_tree
+compare_models_roc(
+    lr_model=lr,
+    tree_model=best_tree,
+    X_test_scaled=data_dict["X_test_scaled"],
+    X_test=X_test,
+    y_test_binary=y_test   # <-- binary labels
+)
+
+```
+
+## Applying SHAP and LIME to Both Models:
+
+```{# {python}
+# #SHAP for Linear Regression
+# def shap_global_linear(model, X_train_scaled, X_test_scaled, feature_names):
+#     libs= import_study_libs()
+#     shap= libs["shap"]
+#     explainer = shap.LinearExplainer(model, X_train_scaled)
+#     shap_values = explainer.shap_values(X_test_scaled)
+
+#     shap.summary_plot(shap_values, X_test_scaled, feature_names=feature_names, plot_type="bar")
+#     shap.summary_plot(shap_values, X_test_scaled, feature_names=feature_names)
+#     # After training your Linear Regression
+# shap_global_linear(lr, X_train_scaled, X_test_scaled, feature_names=X.columns)
+# #SHAP - For Decision Tree
+
+# def shap_global_tree(model, X_train, X_test):
+#     libs= import_study_libs()
+#     shap= libs["shap"]
+#     explainer = shap.TreeExplainer(model)
+#     shap_values = explainer.shap_values(X_test)
+
+#     # Bar plot: average importance
+#     shap.summary_plot(shap_values, X_test, plot_type="bar")
+#     # Beeswarm plot: importance + direction
+#     shap.summary_plot(shap_values, X_test)
+#     # After training your Decision Tree
+# shap_global_tree(best_tree, X_train, X_test)
+
+# #LIME
+# def lime_local_linear(model, X_train_scaled, X_test_scaled, feature_names):
+#     libs= import_study_libs()
+#     lime= libs["lime"]
+#     lime_tabular= libs["lime_tabular"]
+#     explainer = lime.lime_tabular.LimeTabularExplainer(
+#         training_data=np.array(X_train_scaled),
+#         feature_names=feature_names,
+#         mode="regression"
+#     )
+
+#     i = 0  # index of the student to explain
+#     exp = explainer.explain_instance(
+#         data_row=X_test_scaled[i],
+#         predict_fn=model.predict
+#     )
+#     exp.show_in_notebook(show_table=True)
+#     exp.save_to_file("lime_linear_explanation.html")
+
+# lime_local_linear(model=lr, X_train_scaled=X_train_scaled, X_test_scaled=X_test_scaled, feature_names=X.columns
+# )
+# #Lime Decision Tree
+# import lime
+# import lime.lime_tabular
+# import numpy as np
+
+# def lime_local_tree(model, X_train, X_test, feature_names, class_names):
+#     libs= import_study_libs()
+#     np= libs["np"]
+#     lime= libs["lime"]
+#     lime_tabular= libs["lime_tabular"]
+#     explainer = lime.lime_tabular.LimeTabularExplainer(
+#         training_data=np.array(X_train),
+#         feature_names=feature_names,
+#         class_names=class_names,
+#         mode="classification"
+#     )
+
+#     i = 0  # index of the student to explain
+#     exp = explainer.explain_instance(
+#         data_row=X_test.iloc[i],
+#         predict_fn=model.predict_proba
+#     )
+#     exp.show_in_notebook(show_table=True)
+#     exp.save_to_file("lime_tree_explanation.html")
+    
+# lime_local_tree(
+#     model=best_tree,
+#     X_train=X_train,
+#     X_test=X_test,
+#     feature_names=X.columns,
+#     class_names=["Below 75", "Above 75"]
+# )
 
 ```
