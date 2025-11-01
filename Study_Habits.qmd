@@ -256,8 +256,6 @@ The data was first explored by applied statistical in three ways:
 
 -   Correlation between sleep and exam scores
 
--   Outlier detection
-
 ## Data Exploration:
 
 Data were explored and the following plots were obtained:
@@ -268,7 +266,7 @@ Data were explored and the following plots were obtained:
 
 -   Stacked bar plot
 
-    -   The difference in categories between the following age groups: 16-18 years, 19-20 years, 21-22 years and 23-24 years.
+    -   The correlation between exam score and internet quality by gender.
 
 -   Box/Violin plots
 
@@ -278,13 +276,9 @@ Data were explored and the following plots were obtained:
 
     -   To gain multivariate insights between categories
 
--   Parallel Coordinates plots
-
-    -   
-
 -   Radar Charts
 
-    -   The difference in time spent between the following age groups: 16-18 years, 19-20 years, 21-22 years and 23-24 years.
+    -   The average time spent compared by habit.
 
         -   Amount of study hours - study hours
 
@@ -366,32 +360,46 @@ def stackedbar():
     df = EDA_data()
     if df is None:
         return None 
-        
-    libs = import_study_libs()
-    plt= libs["plt"]
-    sns= libs["sns"]
-    Image= libs["Image"]
-
-    # Group by gender and internet quality, then calculate average exam score
     
-    #grouped_data= df.groupby(['gender','exam_score'])['internet_quality'].size().unstack(fill_value=0)
+    libs = import_study_libs()
+    plt = libs["plt"]
+    sns = libs["sns"]
+    Image = libs["Image"]
+
+    # Order categories for consistency
     ordered_quality = ['poor', 'average', 'good']
-    grouped_data = df.groupby(['gender', 'internet_quality'])['exam_score'].mean().unstack()
-    grouped_data = grouped_data[ordered_quality]
 
-    #create the plot     
-    grouped_data.plot(kind='bar', stacked=True, figsize=(10, 6), cmap='rainbow')
-    width= 0.5
+    # Calculate mean exam score for each gender + internet quality
+    grouped_data = (
+        df.groupby(['gender', 'internet_quality'])['exam_score']
+        .mean()
+        .unstack(fill_value=0)
+        .reindex(columns=ordered_quality)
+    )
+
+    # Convert to proportions (100% stacked)
+    proportions = grouped_data.div(grouped_data.sum(axis=1), axis=0)
+
+    # Create 100% stacked bar plot
+    ax = proportions.plot(
+        kind='bar',
+        stacked=True,
+        figsize=(10, 6),
+        cmap='rainbow'
+    )
+
     # Labels and title
-    plt.xlabel('Gender')
-    plt.ylabel('Average Exam Score')
-    plt.title('Exam Scores by Gender and Internet Quality')
-    plt.legend(title='Internet Quality')
-    plt.ylim(0, 100)  # Since scores are out of 100
+    plt.xlabel('Gender', fontsize=12)
+    plt.ylabel('Proportion of Exam Score', fontsize=12)
+    plt.title('Exam Scores and Internet Quality Across Genders',
+              fontsize=14, weight='bold')
+    plt.legend(title='Internet Quality', bbox_to_anchor=(1.05, 1), loc='upper left')
+    plt.xticks(rotation=0)
     plt.tight_layout()
-    plt.savefig('Exam Scores by Gender and Internet quality.png')
-    plt.show()
 
+    # Save and show
+    plt.savefig('Exam_Scores_Proportional_Stacked.png', dpi=300)
+    plt.show()
 stackedbar()
 ```
 
@@ -451,7 +459,7 @@ def heatmap():
     fig, axes= plt.subplots(figsize=(10,5))
     #make it a heatmap
     sns.heatmap(heatdata.corr(), cmap='rainbow', annot= True)
-    axes.set_title('Correlation Of Numeric Study Habits')
+    axes.set_title('Correlation Of Study Habits')
     #save and show figure
     plt.tight_layout()
     fig.savefig('Heatmap.png')
@@ -802,6 +810,29 @@ def plot_tree_roc(model, X_test, y_test):
     
 best_tree, grid_search, X_train, X_test, y_train, y_test = optimise_decision_tree()
 auc_score = plot_tree_roc(best_tree, X_test, y_test)
+
+
+def visualize_tree(model, feature_names, class_names):
+    libs= import_study_libs()
+    plt= libs["plt"]
+    plot_tree= libs["plot_tree"]
+    plt.figure(figsize=(20, 10))
+    plot_tree(
+        model,
+        feature_names=feature_names,
+        class_names=class_names,
+        filled=True,
+        rounded=True,
+        fontsize=10
+    )
+    plt.title("Decision Tree Visualization", fontsize=14, weight="bold")
+    plt.show()
+
+# Call it with your best model
+feature_names = X_train.columns
+class_names = ["Below 75", "Above 75"]
+
+visualize_tree(best_tree, feature_names, class_names)
 ```
 
 ## Compare Machine Models: ROC Curve Comparison
@@ -851,85 +882,134 @@ compare_models_roc(
 
 ## Applying SHAP and LIME to Both Models:
 
-```{# {python}
-# #SHAP for Linear Regression
-# def shap_global_linear(model, X_train_scaled, X_test_scaled, feature_names):
-#     libs= import_study_libs()
-#     shap= libs["shap"]
-#     explainer = shap.LinearExplainer(model, X_train_scaled)
-#     shap_values = explainer.shap_values(X_test_scaled)
+\`\`\`{# {python} \# #SHAP for Linear Regression \# def shap_global_linear(model, X_train_scaled, X_test_scaled, feature_names): \# libs= import_study_libs() \# shap= libs\["shap"\] \# explainer = shap.LinearExplainer(model, X_train_scaled) \# shap_values = explainer.shap_values(X_test_scaled)
 
-#     shap.summary_plot(shap_values, X_test_scaled, feature_names=feature_names, plot_type="bar")
-#     shap.summary_plot(shap_values, X_test_scaled, feature_names=feature_names)
-#     # After training your Linear Regression
+# shap.summary_plot(shap_values, X_test_scaled, feature_names=feature_names, plot_type="bar")
+
+# shap.summary_plot(shap_values, X_test_scaled, feature_names=feature_names)
+
+# \# After training your Linear Regression
+
 # shap_global_linear(lr, X_train_scaled, X_test_scaled, feature_names=X.columns)
+
 # #SHAP - For Decision Tree
 
 # def shap_global_tree(model, X_train, X_test):
-#     libs= import_study_libs()
-#     shap= libs["shap"]
-#     explainer = shap.TreeExplainer(model)
-#     shap_values = explainer.shap_values(X_test)
 
-#     # Bar plot: average importance
-#     shap.summary_plot(shap_values, X_test, plot_type="bar")
-#     # Beeswarm plot: importance + direction
-#     shap.summary_plot(shap_values, X_test)
-#     # After training your Decision Tree
+# libs= import_study_libs()
+
+# shap= libs\["shap"\]
+
+# explainer = shap.TreeExplainer(model)
+
+# shap_values = explainer.shap_values(X_test)
+
+# \# Bar plot: average importance
+
+# shap.summary_plot(shap_values, X_test, plot_type="bar")
+
+# \# Beeswarm plot: importance + direction
+
+# shap.summary_plot(shap_values, X_test)
+
+# \# After training your Decision Tree
+
 # shap_global_tree(best_tree, X_train, X_test)
 
 # #LIME
-# def lime_local_linear(model, X_train_scaled, X_test_scaled, feature_names):
-#     libs= import_study_libs()
-#     lime= libs["lime"]
-#     lime_tabular= libs["lime_tabular"]
-#     explainer = lime.lime_tabular.LimeTabularExplainer(
-#         training_data=np.array(X_train_scaled),
-#         feature_names=feature_names,
-#         mode="regression"
-#     )
 
-#     i = 0  # index of the student to explain
-#     exp = explainer.explain_instance(
-#         data_row=X_test_scaled[i],
-#         predict_fn=model.predict
-#     )
-#     exp.show_in_notebook(show_table=True)
-#     exp.save_to_file("lime_linear_explanation.html")
+# def lime_local_linear(model, X_train_scaled, X_test_scaled, feature_names):
+
+# libs= import_study_libs()
+
+# lime= libs\["lime"\]
+
+# lime_tabular= libs\["lime_tabular"\]
+
+# explainer = lime.lime_tabular.LimeTabularExplainer(
+
+# training_data=np.array(X_train_scaled),
+
+# feature_names=feature_names,
+
+# mode="regression"
+
+# )
+
+# i = 0 \# index of the student to explain
+
+# exp = explainer.explain_instance(
+
+# data_row=X_test_scaled\[i\],
+
+# predict_fn=model.predict
+
+# )
+
+# exp.show_in_notebook(show_table=True)
+
+# exp.save_to_file("lime_linear_explanation.html")
 
 # lime_local_linear(model=lr, X_train_scaled=X_train_scaled, X_test_scaled=X_test_scaled, feature_names=X.columns
+
 # )
+
 # #Lime Decision Tree
+
 # import lime
+
 # import lime.lime_tabular
+
 # import numpy as np
 
 # def lime_local_tree(model, X_train, X_test, feature_names, class_names):
-#     libs= import_study_libs()
-#     np= libs["np"]
-#     lime= libs["lime"]
-#     lime_tabular= libs["lime_tabular"]
-#     explainer = lime.lime_tabular.LimeTabularExplainer(
-#         training_data=np.array(X_train),
-#         feature_names=feature_names,
-#         class_names=class_names,
-#         mode="classification"
-#     )
 
-#     i = 0  # index of the student to explain
-#     exp = explainer.explain_instance(
-#         data_row=X_test.iloc[i],
-#         predict_fn=model.predict_proba
-#     )
-#     exp.show_in_notebook(show_table=True)
-#     exp.save_to_file("lime_tree_explanation.html")
-    
-# lime_local_tree(
-#     model=best_tree,
-#     X_train=X_train,
-#     X_test=X_test,
-#     feature_names=X.columns,
-#     class_names=["Below 75", "Above 75"]
+# libs= import_study_libs()
+
+# np= libs\["np"\]
+
+# lime= libs\["lime"\]
+
+# lime_tabular= libs\["lime_tabular"\]
+
+# explainer = lime.lime_tabular.LimeTabularExplainer(
+
+# training_data=np.array(X_train),
+
+# feature_names=feature_names,
+
+# class_names=class_names,
+
+# mode="classification"
+
 # )
 
-```
+# i = 0 \# index of the student to explain
+
+# exp = explainer.explain_instance(
+
+# data_row=X_test.iloc\[i\],
+
+# predict_fn=model.predict_proba
+
+# )
+
+# exp.show_in_notebook(show_table=True)
+
+# exp.save_to_file("lime_tree_explanation.html")
+
+# lime_local_tree(
+
+# model=best_tree,
+
+# X_train=X_train,
+
+# X_test=X_test,
+
+# feature_names=X.columns,
+
+# class_names=\["Below 75", "Above 75"\]
+
+# )
+
+\`\`\`
