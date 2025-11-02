@@ -8,6 +8,8 @@ jupyter: python3
 kernal: base
 ---
 
+# Github link: <https://github.com/Lee-Anne22/Student-Study-Habits---Further-Insights-and-Trends>
+
 # Data Collection and Preparation
 
 ## Collection of Data:
@@ -173,7 +175,7 @@ def standardize_features(target_column="exam_score", id_column="student_id", sav
     pd = libs["pd"]
     scaler = libs["StandardScaler"]
 
-    # Fill NaNs in parental education
+    #fill NaNs in parental education
     if not df['parental_education_level'].mode().empty:
         df['parental_education_level'] = df['parental_education_level'].fillna(df['parental_education_level'].mode()[0])
     else:
@@ -194,7 +196,7 @@ def standardize_features(target_column="exam_score", id_column="student_id", sav
         df_encoded["diet_quality"].astype(str).str.strip().str.lower().map({"poor": 0, "fair": 1, "good": 2})
     )
 
-    # gender encoding 
+    #gender encoding 
     df_encoded["gender_encoded"] = df_encoded["gender"].map({"other": 2, "male": 1, "female": 0})
 
     # drop raw categorical + ID + parental education ---
@@ -203,7 +205,7 @@ def standardize_features(target_column="exam_score", id_column="student_id", sav
     ]
     df_encoded = df_encoded.drop(columns=[c for c in drop_cols if c in df_encoded.columns])
 
-    # Define modeling features
+    #Selecting modeling features
     modeling_features = [
         "age", "study_hours_per_day", "social_media_hours", "netflix_hours",
         "attendance_percentage", "sleep_hours", "mental_health_rating",
@@ -215,21 +217,23 @@ def standardize_features(target_column="exam_score", id_column="student_id", sav
     X = df_encoded[modeling_features].drop(columns=[target_column])
     y = df_encoded[target_column]
 
-    # Scale numeric features
+    #scale numeric features for machine models
     X_scaled = scaler().fit_transform(X)
 
     if save:
         df_encoded.to_csv("Encoded_student_habits.csv", index=False)
         print("Encoded dataset saved as 'student_habits_encoded.csv'")
 
-    # Return only encoded dataset
+    #return only encoded dataset
     return X_scaled, y, df_encoded
+    
+#calling function
 standardize_features()
 ```
 
 ## New CSV file:
 
-The new encoded data is saved as student_habits_encoded.csv which is imported into a new data loader function to be used through the project.
+The new encoded data is saved as Encoded_student_habits.csv which is imported into a new data loader function to be used through the project.
 
 ```{python}
 #New function to load new encoded csv
@@ -242,6 +246,7 @@ def ml_data():
     except FileNotFoundError:
         print (f"File not found!: {file}")
         return None
+        
 #calling function    
 ml_data()
 ```
@@ -250,11 +255,7 @@ ml_data()
 
 ## Statistical Analysis:
 
-The data was first explored by applied statistical in three ways:
-
--   Mean study time by Health Tier
-
--   Correlation between sleep and exam scores
+The data was first explored by applied statistical analysis using the describe function.
 
 ## Data Exploration:
 
@@ -262,11 +263,11 @@ Data were explored and the following plots were obtained:
 
 -   Scatter plot
 
-    -   The correlation between exam score and internet quality, sleep hours and exercise frequency
+    -   The correlation between exam score and internet quality, sleep hours and exercise frequency.
 
 -   Stacked bar plot
 
-    -   The correlation between exam score and internet quality by gender.
+    -   The correlation between exam score and internet quality by gender and followed up by a 3D visualisation.
 
 -   Box/Violin plots
 
@@ -274,11 +275,11 @@ Data were explored and the following plots were obtained:
 
 -   Heatmaps
 
-    -   To gain multivariate insights between categories
+    -   To gain multivariate insights between categories.
 
 -   Radar Charts
 
-    -   The average time spent compared by habit.
+    -   The average time spent per day for the following habits:
 
         -   Amount of study hours - study hours
 
@@ -287,6 +288,8 @@ Data were explored and the following plots were obtained:
         -   Amount of time spent on Netflix - netflix hours
 
         -   Amount of time spent on sleep - sleep hours
+
+### Scatter Plot: Exam Scores Vs Study Hours, Exercise Frequency and Sleep Hours
 
 ```{python}
 def Scatterplots():
@@ -350,12 +353,15 @@ def Scatterplots():
     
     fig.savefig('ExamScore_vs_Study_Habits.png') #saving plot as png
     plt.show()
-
+#calling function
 Scatterplots()
+
 ```
 
+### Stacked Bar Plot: Comparing the Exam Proportions Represented by Internet Quality Across Genders
+
 ```{python}
-#Stacked bar plot1: Difference in age groups
+#Stacked bar plot1: 
 def stackedbar():
     df = EDA_data()
     if df is None:
@@ -366,10 +372,10 @@ def stackedbar():
     sns = libs["sns"]
     Image = libs["Image"]
 
-    # Order categories for consistency
+    # order categories for consistency
     ordered_quality = ['poor', 'average', 'good']
 
-    # Calculate mean exam score for each gender + internet quality
+    # calculate mean exam score for each gender + internet quality
     grouped_data = (
         df.groupby(['gender', 'internet_quality'])['exam_score']
         .mean()
@@ -377,10 +383,10 @@ def stackedbar():
         .reindex(columns=ordered_quality)
     )
 
-    # Convert to proportions (100% stacked)
+    # convert to proportions (100% stacked)
     proportions = grouped_data.div(grouped_data.sum(axis=1), axis=0)
 
-    # Create 100% stacked bar plot
+    #create plot
     ax = proportions.plot(
         kind='bar',
         stacked=True,
@@ -388,7 +394,7 @@ def stackedbar():
         cmap='rainbow'
     )
 
-    # Labels and title
+    #labels and title
     plt.xlabel('Gender', fontsize=12)
     plt.ylabel('Proportion of Exam Score', fontsize=12)
     plt.title('Exam Scores and Internet Quality Across Genders',
@@ -397,16 +403,66 @@ def stackedbar():
     plt.xticks(rotation=0)
     plt.tight_layout()
 
-    # Save and show
+    #save and show
     plt.savefig('Exam_Scores_Proportional_Stacked.png', dpi=300)
     plt.show()
+
+#calling function
 stackedbar()
+
 ```
+
+### 3D Surface Visualisation: Comparing Exam Scores According to Internet Quality Across Genders
+
+```{python}
+#Internet quality correlation to exam scores
+def surface3d_exam():
+    libs= import_study_libs()
+    plt= libs["plt"]
+    sns= libs["sns"]
+    np= libs["np"]
+    Image= libs["Image"]
+    df = EDA_data()
+    if df is None:
+        return None
+
+    #encode categories numerically
+    gender_map = {'other': 2, 'male': 1, 'female': 0}
+    quality_map = {'poor': 0, 'average': 1, 'good': 2}
+    df['gender_num'] = df['gender'].map(gender_map)
+    df['quality_num'] = df['internet_quality'].map(quality_map)
+
+    #pivot to grid
+    pivot = df.groupby(['gender_num', 'quality_num'])['exam_score'].mean().unstack()
+    X, Y = np.meshgrid(pivot.columns, pivot.index)
+    Z = pivot.values
+
+    #create 3D surface plot 
+    fig = plt.figure(figsize=(10, 7))
+    ax = fig.add_subplot(111, projection="3d")
+
+    surf = ax.plot_surface(X, Y, Z, cmap="rainbow", alpha=0.8)
+
+    ax.set_xlabel("Internet Quality (0=poor,1=avg,2=good)")
+    ax.set_ylabel("Gender (2=other, 1=male, 0=female)")
+    ax.set_zlabel("Mean Exam Score")
+    ax.set_title("3D Visualisation: Exam Score by Internet Quality & Gender")
+    plt.tight_layout()
+
+    fig.colorbar(surf, shrink=0.5, aspect=10, label="Exam Score")
+    plt.savefig('Exam_Scores_3D.png') #saving plot as png
+    plt.show()
+#call funciton
+surface3d_exam()
+
+```
+
+### Violin Plot: Comparing Mental Health Across Age groups
 
 ```{python}
 #Violin plot: Mental Health rating per age group: 16-18 years, 19-20 years, 21-22 years and 23-24 years
 def violinplot():
-    #import libraries
+    #import data and libraries
     df = EDA_data()
     if df is None:
         return None 
@@ -417,7 +473,7 @@ def violinplot():
     pd= libs["pd"]
     Image= libs["Image"]
 
-    #Extract data and make age groups through the use of bins
+    #extract data and separate into age groups through the use of bins
     bins = [15, 18, 20, 22, 24]
     labels = ['16-18', '19-20', '21-22', '23-24']
     df['age_group'] = pd.cut(df['age'], bins=bins, labels=labels, right=True)
@@ -434,14 +490,59 @@ def violinplot():
     #save figure and show
     fig.savefig('mental_health_rating_across_age_groups.png')
     plt.show()
-
+    
+#call funtcion
 violinplot()
+
+
 ```
+
+### Outliers Across Age Categories for Mental Health Rating:
+
+```{python}
+def calculate_outliers():
+    # import libraries
+    df = EDA_data()
+    if df is None:
+        return None
+    
+    libs = import_study_libs()
+    pd = libs["pd"]
+    
+    # Extract data and make age groups
+    bins = [15, 18, 20, 22, 24]
+    labels = ['16-18', '19-20', '21-22', '23-24']
+    df['age_group'] = pd.cut(df['age'], bins=bins, labels=labels, right=True)
+    
+    # Function to detect outliers using IQR
+    def find_outliers(group):
+        Q1 = group['mental_health_rating'].quantile(0.25)
+        Q3 = group['mental_health_rating'].quantile(0.75)
+        IQR = Q3 - Q1
+        lower_bound = Q1 - 1.5 * IQR
+        upper_bound = Q3 + 1.5 * IQR
+        outliers = group[(group['mental_health_rating'] < lower_bound) | 
+                         (group['mental_health_rating'] > upper_bound)]
+        return outliers
+    
+    # Apply per age group
+    outliers_by_group = df.groupby('age_group').apply(find_outliers)
+    
+    return outliers_by_group
+
+outliers = calculate_outliers()
+print("Outliers detected per age group:")
+print(outliers[['age_group', 'mental_health_rating']])
+#Calling function
+calculate_outliers()
+```
+
+### Heatmap: Multivariate Data Analysis
 
 ```{python}
 #Heatmap
 def heatmap():
-    #import libraries
+    #import data and libraries
     df = EDA_data()
     if df is None:
         return None 
@@ -452,7 +553,8 @@ def heatmap():
     Image= libs["Image"]
 
     #cleaning to prep data for the heatmap by removing categorical fields
-    heatdata=df.drop(['student_id', 'gender', 'part_time_job', 'diet_quality', 'internet_quality', 'parental_education_level', 'extracurricular_participation'], axis='columns')
+    heatdata=df.drop(['student_id', 'gender', 'part_time_job', 'diet_quality', 'internet_quality',
+                      'parental_education_level', 'extracurricular_participation'], axis='columns')
     
     
     #create plot
@@ -460,17 +562,17 @@ def heatmap():
     #make it a heatmap
     sns.heatmap(heatdata.corr(), cmap='rainbow', annot= True)
     axes.set_title('Correlation Of Study Habits')
+    
     #save and show figure
     plt.tight_layout()
     fig.savefig('Heatmap.png')
     plt.show()
-    
+
+#calling function
 heatmap()
 ```
 
-```{python}
-#Parallel Coordinates plot
-```
+### Radar Plot: Comparing AVG Time Spent Across Habits
 
 ```{python}
 #Radar Charts
@@ -487,6 +589,7 @@ def radarplot():
     go= libs["go"]
     pio= libs["pio"]
     Image= libs["Image"]
+    
     # pio renderer set for radar plot in Quarto but converting to ipynb
     pio.renderers.default = 'notebook'
     # extract data and get the averages
@@ -516,7 +619,7 @@ def radarplot():
 )
 
     fig.show()
-
+#call funciton
 radarplot()
 ```
 
@@ -557,10 +660,9 @@ def train_LR():
         return None
 
     # features and target
-    X = df[[
-        "attendance_percentage", "study_hours_per_day", "social_media_hours", "netflix_hours",
+    X = df[["attendance_percentage","study_hours_per_day", "social_media_hours", "netflix_hours",
         "sleep_hours", "exercise_frequency", "mental_health_rating", "part_time_job_encoded",
-        "extracurricular_encoded", "internet_quality_encoded", "diet_quality_encoded", "gender_encoded"
+        "extracurricular_encoded", "internet_quality_encoded", "diet_quality_encoded"
     ]]
     y = df["exam_score"]
 
@@ -591,15 +693,15 @@ def model_build(X, y):
     sm = libs["sm"]
     pd = libs["pd"]
 
-    # Ensure numeric
+    #ensure its only numeric
     X = X.apply(pd.to_numeric, errors="coerce")
     y = pd.to_numeric(y, errors="coerce")
 
-    # Drop NaNs
+    #drop NaNs
     mask = X.notnull().all(axis=1) & y.notnull()
     X, y = X.loc[mask], y.loc[mask]
 
-    # Fit OLS
+    #fit OLS
     X_const = sm.add_constant(X)
     lm = sm.OLS(y, X_const).fit()
     print(lm.summary())
@@ -619,7 +721,7 @@ def checkVIF(X):
     return vif_df.sort_values(by="VIF", ascending=False)
 
 
-# Evaluation with Train vs Test model
+#Evaluation with Train vs Test model
 def evaluate_model(model, X_train, y_train, X_test, y_test):
     libs = import_study_libs()
     mean_squared_error = libs["mean_squared_error"]
@@ -670,12 +772,12 @@ print("Train R²:", results["train_r2"])
 print("Test MSE:", results["test_mse"])
 print("Test R²:", results["test_r2"])
 
-# Statsmodels OLS summary (inference)
+#Statsmodels OLS summary
 X, y = data_dict["X_train"], data_dict["y_train"]
 lm = model_build(X, y)
 print("OLS Train R²:", lm.rsquared)
 
-# VIF check
+#VIF check
 print("\n--- Variance Inflation Factors ---")
 print(checkVIF(X))
 ```
@@ -690,14 +792,14 @@ def plot_model_evaluation(y_train, y_train_pred, y_test, y_test_pred):
 
     fig, axes = plt.subplots(1, 2, figsize=(12, 5))
 
-    # --- Train set ---
+    #train set
     axes[0].scatter(y_train, y_train_pred, color="blue", alpha=0.6)
     axes[0].plot([y_train.min(), y_train.max()], [y_train.min(), y_train.max()], "r--")
     axes[0].set_title("Train Set: Actual vs Predicted")
     axes[0].set_xlabel("Actual Exam Score")
     axes[0].set_ylabel("Predicted Exam Score")
 
-    # --- Test set ---
+    #test set
     axes[1].scatter(y_test, y_test_pred, color="green", alpha=0.6)
     axes[1].plot([y_test.min(), y_test.max()], [y_test.min(), y_test.max()], "r--")
     axes[1].set_title("Test Set: Actual vs Predicted")
@@ -708,11 +810,11 @@ def plot_model_evaluation(y_train, y_train_pred, y_test, y_test_pred):
     plt.show()
     return axes
 
-# Predictions
+#predictions
 y_train_pred = lr.predict(data_dict["X_train_scaled"])
 y_test_pred = lr.predict(data_dict["X_test_scaled"])
 
-# Plot evaluation
+#call plot evaluation function
 plot_model_evaluation(
     data_dict["y_train"], y_train_pred,
     data_dict["y_test"], y_test_pred
@@ -724,6 +826,7 @@ plot_model_evaluation(
 
 ```{python}
 def optimise_decision_tree():
+    #import libraries
     libs = import_study_libs()
     pd = libs["pd"]
     train_test_split = libs["train_test_split"]
@@ -733,13 +836,13 @@ def optimise_decision_tree():
     confusion_matrix = libs["confusion_matrix"]
     classification_report = libs["classification_report"]
 
-    # Load encoded dataset
+    #load encoded dataset
     df = ml_data()
 
-    # Create binary target: 1 if exam_score >= 75, else 0
+    #create binary target: 1 if exam_score >= 75, else 0
     df["above_75"] = (df["exam_score"] >= 75).astype(int)
 
-    # Features and target
+    #features and target
     X = df.drop(columns=["exam_score", "above_75"])
     y = df["above_75"]
 
@@ -844,17 +947,17 @@ def compare_models_roc(lr_model, tree_model, X_test_scaled, X_test, y_test_binar
     roc_auc_score = libs["roc_auc_score"]
     plt = libs["plt"]
 
-    # --- Decision Tree probabilities ---
+    # Decision Tree probabilities
     y_probs_tree = tree_model.predict_proba(X_test)[:, 1]
     fpr_tree, tpr_tree, _ = roc_curve(y_test_binary, y_probs_tree)
     auc_tree = roc_auc_score(y_test_binary, y_probs_tree)
 
-    # --- Linear Regression predictions (continuous exam scores) ---
+    #Linear Regression predictions for continous exam scores
     y_pred_lr = lr_model.predict(X_test_scaled)
     fpr_lr, tpr_lr, _ = roc_curve(y_test_binary, y_pred_lr)
     auc_lr = roc_auc_score(y_test_binary, y_pred_lr)
 
-    # --- Plot both curves ---
+    # plot both curves 
     plt.figure(figsize=(7, 6))
     plt.plot(fpr_tree, tpr_tree, color="blue", label=f"Decision Tree (AUC = {auc_tree:.2f})")
     plt.plot(fpr_lr, tpr_lr, color="green", label=f"Linear Regression (AUC = {auc_lr:.2f})")
@@ -866,150 +969,16 @@ def compare_models_roc(lr_model, tree_model, X_test_scaled, X_test, y_test_binar
     plt.legend(loc="lower right")
     plt.show()
 
-# From optimise_decision_tree()
+#calling best parameters for curve
 best_tree, grid_search, X_train, X_test, y_train, y_test = optimise_decision_tree()
 
-# y_test is already binary (0/1) from optimise_decision_tree
+# y_test is already binary 
 compare_models_roc(
     lr_model=lr,
     tree_model=best_tree,
     X_test_scaled=data_dict["X_test_scaled"],
     X_test=X_test,
-    y_test_binary=y_test   # <-- binary labels
+    y_test_binary=y_test   #binary labels
 )
 
 ```
-
-## Applying SHAP and LIME to Both Models:
-
-\`\`\`{# {python} \# #SHAP for Linear Regression \# def shap_global_linear(model, X_train_scaled, X_test_scaled, feature_names): \# libs= import_study_libs() \# shap= libs\["shap"\] \# explainer = shap.LinearExplainer(model, X_train_scaled) \# shap_values = explainer.shap_values(X_test_scaled)
-
-# shap.summary_plot(shap_values, X_test_scaled, feature_names=feature_names, plot_type="bar")
-
-# shap.summary_plot(shap_values, X_test_scaled, feature_names=feature_names)
-
-# \# After training your Linear Regression
-
-# shap_global_linear(lr, X_train_scaled, X_test_scaled, feature_names=X.columns)
-
-# #SHAP - For Decision Tree
-
-# def shap_global_tree(model, X_train, X_test):
-
-# libs= import_study_libs()
-
-# shap= libs\["shap"\]
-
-# explainer = shap.TreeExplainer(model)
-
-# shap_values = explainer.shap_values(X_test)
-
-# \# Bar plot: average importance
-
-# shap.summary_plot(shap_values, X_test, plot_type="bar")
-
-# \# Beeswarm plot: importance + direction
-
-# shap.summary_plot(shap_values, X_test)
-
-# \# After training your Decision Tree
-
-# shap_global_tree(best_tree, X_train, X_test)
-
-# #LIME
-
-# def lime_local_linear(model, X_train_scaled, X_test_scaled, feature_names):
-
-# libs= import_study_libs()
-
-# lime= libs\["lime"\]
-
-# lime_tabular= libs\["lime_tabular"\]
-
-# explainer = lime.lime_tabular.LimeTabularExplainer(
-
-# training_data=np.array(X_train_scaled),
-
-# feature_names=feature_names,
-
-# mode="regression"
-
-# )
-
-# i = 0 \# index of the student to explain
-
-# exp = explainer.explain_instance(
-
-# data_row=X_test_scaled\[i\],
-
-# predict_fn=model.predict
-
-# )
-
-# exp.show_in_notebook(show_table=True)
-
-# exp.save_to_file("lime_linear_explanation.html")
-
-# lime_local_linear(model=lr, X_train_scaled=X_train_scaled, X_test_scaled=X_test_scaled, feature_names=X.columns
-
-# )
-
-# #Lime Decision Tree
-
-# import lime
-
-# import lime.lime_tabular
-
-# import numpy as np
-
-# def lime_local_tree(model, X_train, X_test, feature_names, class_names):
-
-# libs= import_study_libs()
-
-# np= libs\["np"\]
-
-# lime= libs\["lime"\]
-
-# lime_tabular= libs\["lime_tabular"\]
-
-# explainer = lime.lime_tabular.LimeTabularExplainer(
-
-# training_data=np.array(X_train),
-
-# feature_names=feature_names,
-
-# class_names=class_names,
-
-# mode="classification"
-
-# )
-
-# i = 0 \# index of the student to explain
-
-# exp = explainer.explain_instance(
-
-# data_row=X_test.iloc\[i\],
-
-# predict_fn=model.predict_proba
-
-# )
-
-# exp.show_in_notebook(show_table=True)
-
-# exp.save_to_file("lime_tree_explanation.html")
-
-# lime_local_tree(
-
-# model=best_tree,
-
-# X_train=X_train,
-
-# X_test=X_test,
-
-# feature_names=X.columns,
-
-# class_names=\["Below 75", "Above 75"\]
-
-# )
-
-\`\`\`

@@ -34,12 +34,11 @@ Data exploration began with statistical analysis consisting of mmmm, mmm, mmm. A
 -   Scatter plot
     -   The correlation between exam score and internet quality, sleep hours and exercise frequency
 -   Stacked bar plot
-    -   The relationship between internet quality and exam scores by gender
+    -   The relationship between internet quality and exam scores by gender, further explored using a 3D surface plot.
 -   Violin plot
     -   Mental Health rating per age group: 16-18 years, 19-20 years, 21-22 years and 23-24 years.
 -   Heatmap
     -   To gain multivariate insights between categories
--   Parallel coordinates
 -   Radar plot
     -   The average amount of time spent on different habits:
 
@@ -60,6 +59,25 @@ Two machine learning models- Linear Regression and a Decision Tree- were built a
 -   Social Media hours
 -   Netflix hours
 -   Exercise frequency
--   Predicted Exam Score
 
 The categories expected to be most profitable were increased to predict the impact on exam score. These categories were: sleep hours, study hours and exercise frequency. Meanwhile, a Decision Tree model was utilised to predict whether a student would obtain an exam score above 75% or not.
+
+# Project Insights
+
+1.  Books open doors, but rest keeps you standing.
+
+-   High correlation between exam scores and both mental health rating and study hours were found.
+
+-   **Suggested Niche Industries: Health Focused**
+
+1.  Exam success isn’t random — it scales with study time, peaking around 3.5 hours.
+
+-   Average study time is around 3.5 hours
+
+-   **Suggested Niche Industries: Gamifying Studying, Study Timers, Endurance Supplements**
+
+3\. Connection quality peaks early — after that, it’s all you.
+
+-   Better internet access were correlated to higher exam scores, regardless of gender.
+
+-   **Suggested Niche Industries: Study Cafes, Habit Reinforcement Apps**
