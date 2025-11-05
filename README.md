@@ -97,14 +97,14 @@ utilised to predict whether a student would obtain an exam score above
 
 # Project Insights
 
-1.  Books open doors, but rest keeps you standing.
+1\.  Books open doors, but rest keeps you standing.
 
 - High correlation between exam scores and both mental health rating and
   study hours were found.
 
 - **Suggested Niche Industries: Health Focused**
 
-1.  Exam success isn’t random — it scales with study time, peaking
+2\.  Exam success isn’t random — it scales with study time, peaking
     around 3.5 hours.
 
 - Average study time is around 3.5 hours
